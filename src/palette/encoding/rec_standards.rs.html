@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/rec_standards.rs`."><title>rec_standards.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b0742ba02757f159.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.83.0 (90b35a623 2024-11-26)" data-channel="1.83.0" data-search-js="search-f0d225181b97f9a4.js" data-settings-js="settings-805db61a62df4bd2.js" ><script src="../../../static.files/storage-1d39b6787ed640ff.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-f070b9041d14864c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-0111fcff984fae8f.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">palette/encoding/</div>rec_standards.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/rec_standards.rs`."><title>rec_standards.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-42caa33d.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.84.0 (9fc6b4312 2025-01-07)" data-channel="1.84.0" data-search-js="search-92e6798f.js" data-settings-js="settings-0f613d39.js" ><script src="../../../static.files/storage-59e33391.js"></script><script defer src="../../../static.files/src-script-56102188.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">palette/encoding/</div>rec_standards.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -251,57 +251,15 @@
 <a href="#250" id="250">250</a>
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
-<a href="#253" id="253">253</a>
-<a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
-<a href="#265" id="265">265</a>
-<a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
-<a href="#280" id="280">280</a>
-<a href="#281" id="281">281</a>
-<a href="#282" id="282">282</a>
-<a href="#283" id="283">283</a>
-<a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a></pre></div><pre class="rust"><code><span class="doccomment">//! The ITU-R Recommendation BT.2020 (Rec. 2020) and BT.709 (Rec. 709) standards and their
+<a href="#253" id="253">253</a></pre></div><pre class="rust"><code><span class="doccomment">//! The ITU-R Recommendation BT.2020 (Rec. 2020) and BT.709 (Rec. 709) standards and their
 //! associated transfer function.
 
 </span><span class="kw">use crate</span>::{
     bool_mask::LazySelect,
-    encoding::{FromLinear, IntoLinear, Srgb},
+    encoding::{
+        lut::{<span class="self">self</span>, rec_standards::<span class="kw-2">*</span>},
+        FromLinear, IntoLinear, Srgb,
+    },
     luma::LumaStandard,
     num::{Arithmetics, MulAdd, MulSub, PartialCmp, Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
@@ -309,17 +267,7 @@
     Mat3, Yxy,
 };
 
-<span class="kw">use </span>lookup_tables::<span class="kw-2">*</span>;
-
-<span class="kw">mod </span>lookup_tables;
-
-<span class="doccomment">/// The Rec. 2020 standard, color space, and transfer function.
-///
-/// # As transfer function
-///
-/// `Rec2020` will not use any kind of approximation when converting from `T` to
-/// `T`. This involves calls to `powf`, which may make it too slow for certain
-/// applications.
+<span class="doccomment">/// The Rec. 2020 standard, color space, and transfer function ([`RecOetf`]).
 </span><span class="attr">#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>Rec2020;
 
@@ -376,13 +324,7 @@
     <span class="kw">type </span>TransferFn = RecOetf;
 }
 
-<span class="doccomment">/// The Rec. 709 standard, color space, and transfer function.
-///
-/// # As transfer function
-///
-/// `Rec709` will not use any kind of approximation when converting from `T` to
-/// `T`. This involves calls to `powf`, which may make it too slow for certain
-/// applications.
+<span class="doccomment">/// The Rec. 709 standard, color space, and transfer function ([`RecOetf`]).
 </span><span class="attr">#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>Rec709;
 
@@ -398,6 +340,18 @@
 
 <span class="doccomment">/// The opto-electronic transfer function used in standard dynamic range (SDR)
 /// standards by the ITU-R such as [`Rec709`] and [`Rec2020`].
+///
+/// `RecOetf` will not use any kind of approximation when converting from `T` to
+/// `T`. This involves calls to `powf`, which may make it too slow for certain
+/// applications.
+///
+/// There are some specialized cases where it has been optimized:
+///
+/// * When converting from `u8` to `f32` or `f64`, while converting to linear
+///   space. This uses lookup tables with precomputed values.
+/// * When converting from `f32` or `f64` to `u8`, while converting from linear
+///   space. This uses a fast algorithm that guarantees a maximum error in the
+///   result of less than 0.6 in line with [this DirectX spec](&lt;https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#FLOATtoSRGB&gt;).
 </span><span class="attr">#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>RecOetf;
 
@@ -442,57 +396,7 @@
 <span class="kw">impl </span>FromLinear&lt;f32, u8&gt; <span class="kw">for </span>RecOetf {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>from_linear(linear: f32) -&gt; u8 {
-        <span class="comment">// Algorithm modeled closely off of `f32_to_srgb8` from fast-srgb8 crate
-        </span><span class="kw">const </span>MAX_FLOAT_BITS: u32 = <span class="number">0x3f7fffff</span>; <span class="comment">// 1.0 - f32::EPSILON
-        </span><span class="kw">const </span>MIN_FLOAT_BITS: u32 = <span class="number">0x39000000</span>; <span class="comment">// 2^(-13)
-        </span><span class="kw">let </span>max_float = f32::from_bits(MAX_FLOAT_BITS);
-        <span class="kw">let </span>min_float = f32::from_bits(MIN_FLOAT_BITS);
-
-        <span class="kw">let </span><span class="kw-2">mut </span>input = linear;
-        <span class="comment">// Implemented this way to map NaN to `min_float`
-        </span><span class="kw">if </span>input.partial_cmp(<span class="kw-2">&amp;</span>min_float) != <span class="prelude-val">Some</span>(core::cmp::Ordering::Greater) {
-            input = min_float;
-        } <span class="kw">else if </span>input &gt; max_float {
-            input = max_float;
-        }
-        <span class="kw">let </span>input_bits = input.to_bits();
-        <span class="attr">#[cfg(test)]
-        </span>{
-            <span class="macro">debug_assert!</span>((MIN_FLOAT_BITS..=MAX_FLOAT_BITS).contains(<span class="kw-2">&amp;</span>input_bits));
-        }
-        <span class="comment">// Safety: all input floats are clamped into the {min_float, max_float} range,
-        // which turns out in this case to guarantee that their bitwise reprs are
-        // clamped to the {MIN_FLOAT_BITS, MAX_FLOAT_BITS} range (guaranteed by the
-        // fact that min_float/max_float are the normal, finite, the same sign, and
-        // not zero).
-        //
-        // Because of that, the smallest result of `input_bits - MIN_FLOAT_BITS` is 0
-        // (when `input_bits` is `MIN_FLOAT_BITS`), and the largest is `0x067fffff`,
-        // (when `input_bits` is `MAX_FLOAT_BITS`). `0x067fffff &gt;&gt; 20` is 0x67, e.g. 103,
-        // and thus all possible results are inbounds for the (104 item) table.
-        // This is all verified in test code.
-        //
-        // Note that the compiler can't figure this out on it's own, so the
-        // get_unchecked does help some.
-        </span><span class="kw">let </span>entry = {
-            <span class="kw">let </span>i = ((input_bits - MIN_FLOAT_BITS) &gt;&gt; <span class="number">20</span>) <span class="kw">as </span>usize;
-            <span class="attr">#[cfg(test)]
-            </span>{
-                <span class="macro">debug_assert!</span>(TO_REC_OETF_U8.get(i).is_some());
-            }
-            <span class="kw">unsafe </span>{ <span class="kw-2">*</span>TO_REC_OETF_U8.get_unchecked(i) }
-        };
-
-        <span class="kw">let </span>bias = (entry &gt;&gt; <span class="number">16</span>) &lt;&lt; <span class="number">9</span>;
-        <span class="kw">let </span>scale = entry &amp; <span class="number">0xffff</span>;
-
-        <span class="kw">let </span>t = (input_bits &gt;&gt; <span class="number">12</span>) &amp; <span class="number">0xff</span>;
-        <span class="kw">let </span>res = (bias + scale * t) &gt;&gt; <span class="number">16</span>;
-        <span class="attr">#[cfg(test)]
-        </span>{
-            <span class="macro">debug_assert!</span>(res &lt; <span class="number">256</span>, <span class="string">"{}"</span>, res);
-        }
-        res <span class="kw">as </span>u8
+        lut::linear_f32_to_encoded_u8(linear, REC_OETF_MIN_FLOAT, <span class="kw-2">&amp;</span>TO_REC_OETF_U8)
     }
 }
 
@@ -506,7 +410,7 @@
 <span class="kw">impl </span>FromLinear&lt;f64, u8&gt; <span class="kw">for </span>RecOetf {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>from_linear(linear: f64) -&gt; u8 {
-        RecOetf::from_linear(linear <span class="kw">as </span>f32)
+        &lt;RecOetf&gt;::from_linear(linear <span class="kw">as </span>f32)
     }
 }
 
@@ -537,7 +441,7 @@
 
     <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
     </span><span class="kw">mod </span>transfer {
-        <span class="kw">use </span><span class="kw">crate</span>::encoding::{rec_standards::RecOetf, FromLinear, IntoLinear};
+        <span class="kw">use </span><span class="kw">crate</span>::encoding::{FromLinear, IntoLinear, RecOetf};
 
         <span class="attr">#[test]
         </span><span class="kw">fn </span>lin_to_enc_to_lin() {
@@ -556,17 +460,23 @@
                 <span class="macro">assert_relative_eq!</span>(encoded, RecOetf::from_linear(linear), epsilon = <span class="number">0.0000001</span>);
             }
         }
+    }
+
+    <span class="kw">mod </span>lut {
+        <span class="kw">use </span><span class="kw">crate</span>::encoding::{FromLinear, IntoLinear, RecOetf};
 
         <span class="attr">#[test]
+        #[cfg(feature = <span class="string">"approx"</span>)]
         </span><span class="kw">fn </span>test_u8_f32_into_impl() {
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">255u8 </span>{
                 <span class="kw">let </span>u8_impl: f32 = RecOetf::into_linear(i);
                 <span class="kw">let </span>f32_impl = RecOetf::into_linear(i <span class="kw">as </span>f32 / <span class="number">255.0</span>);
-                <span class="macro">assert_relative_eq!</span>(u8_impl, f32_impl, epsilon = <span class="number">0.0000001</span>);
+                <span class="macro">assert_relative_eq!</span>(u8_impl, f32_impl, epsilon = <span class="number">0.000001</span>);
             }
         }
 
         <span class="attr">#[test]
+        #[cfg(feature = <span class="string">"approx"</span>)]
         </span><span class="kw">fn </span>test_u8_f64_into_impl() {
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">255u8 </span>{
                 <span class="kw">let </span>u8_impl: f64 = RecOetf::into_linear(i);

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/p3.rs`."><title>p3.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b0742ba02757f159.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.83.0 (90b35a623 2024-11-26)" data-channel="1.83.0" data-search-js="search-f0d225181b97f9a4.js" data-settings-js="settings-805db61a62df4bd2.js" ><script src="../../../static.files/storage-1d39b6787ed640ff.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-f070b9041d14864c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-0111fcff984fae8f.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">palette/encoding/</div>p3.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/p3.rs`."><title>p3.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-42caa33d.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.84.0 (9fc6b4312 2025-01-07)" data-channel="1.84.0" data-search-js="search-92e6798f.js" data-settings-js="settings-0f613d39.js" ><script src="../../../static.files/storage-59e33391.js"></script><script defer src="../../../static.files/src-script-56102188.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">palette/encoding/</div>p3.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -312,12 +312,131 @@
 <a href="#311" id="311">311</a>
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
-<a href="#314" id="314">314</a></pre></div><pre class="rust"><code><span class="doccomment">//! The P3 color space(s) and standards.
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a></pre></div><pre class="rust"><code><span class="doccomment">//! The P3 color space(s) and standards.
 
 </span><span class="kw">use </span>core::marker::PhantomData;
 
 <span class="kw">use crate</span>::{
-    encoding::{FromLinear, IntoLinear, Srgb},
+    encoding::{
+        lut::{<span class="self">self</span>, p3::<span class="kw-2">*</span>},
+        FromLinear, IntoLinear, Srgb,
+    },
     luma::LumaStandard,
     num::{Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
@@ -413,10 +532,18 @@
 
 <span class="kw">impl</span>&lt;T: Real, F&gt; Primaries&lt;T&gt; <span class="kw">for </span>DciP3Plus&lt;F&gt; {
     <span class="kw">fn </span>red() -&gt; Yxy&lt;Any, T&gt; {
-        Yxy::new(T::from_f64(<span class="number">0.740</span>), T::from_f64(<span class="number">0.270</span>), T::from_f64(<span class="number">0.203986</span>))
+        Yxy::new(
+            T::from_f64(<span class="number">0.740</span>),
+            T::from_f64(<span class="number">0.270</span>),
+            T::from_f64(<span class="number">0.203986</span>),
+        )
     }
     <span class="kw">fn </span>green() -&gt; Yxy&lt;Any, T&gt; {
-        Yxy::new(T::from_f64(<span class="number">0.220</span>), T::from_f64(<span class="number">0.780</span>), T::from_f64(<span class="number">0.882591</span>))
+        Yxy::new(
+            T::from_f64(<span class="number">0.220</span>),
+            T::from_f64(<span class="number">0.780</span>),
+            T::from_f64(<span class="number">0.882591</span>),
+        )
     }
     <span class="kw">fn </span>blue() -&gt; Yxy&lt;Any, T&gt; {
         Yxy::new(
@@ -465,6 +592,18 @@
 }
 
 <span class="doccomment">/// A gamma 2.6 transfer function used by some P3 variants
+///
+/// `P3Gamma` will not use any kind of approximation when converting from `T` to
+/// `T`. This involves calls to `powf`, which may make it too slow for certain
+/// applications.
+///
+/// There are some specialized cases where it has been optimized:
+///
+/// * When converting from `u8` to `f32` or `f64`, while converting to linear
+///   space. This uses lookup tables with precomputed values.
+/// * When converting from `f32` or `f64` to `u8`, while converting from linear
+///   space. This uses a fast algorithm that guarantees a maximum error in the
+///   result of less than 0.6 in line with [this DirectX spec](&lt;https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#FLOATtoSRGB&gt;).
 </span><span class="attr">#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>P3Gamma;
 
@@ -485,6 +624,34 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>from_linear(linear: T) -&gt; T {
         linear.powf(T::from_f64(<span class="number">1.0 </span>/ <span class="number">2.6</span>))
+    }
+}
+
+<span class="kw">impl </span>IntoLinear&lt;f32, u8&gt; <span class="kw">for </span>P3Gamma {
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>into_linear(encoded: u8) -&gt; f32 {
+        P3_GAMMA_U8_TO_F32[encoded <span class="kw">as </span>usize]
+    }
+}
+
+<span class="kw">impl </span>FromLinear&lt;f32, u8&gt; <span class="kw">for </span>P3Gamma {
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_linear(linear: f32) -&gt; u8 {
+        lut::linear_f32_to_encoded_u8(linear, P3_GAMMA_MIN_FLOAT, <span class="kw-2">&amp;</span>TO_P3_GAMMA_U8)
+    }
+}
+
+<span class="kw">impl </span>IntoLinear&lt;f64, u8&gt; <span class="kw">for </span>P3Gamma {
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>into_linear(encoded: u8) -&gt; f64 {
+        P3_GAMMA_U8_TO_F64[encoded <span class="kw">as </span>usize]
+    }
+}
+
+<span class="kw">impl </span>FromLinear&lt;f64, u8&gt; <span class="kw">for </span>P3Gamma {
+    <span class="attr">#[inline]
+    </span><span class="kw">fn </span>from_linear(linear: f64) -&gt; u8 {
+        &lt;P3Gamma&gt;::from_linear(linear <span class="kw">as </span>f32)
     }
 }
 
@@ -623,6 +790,71 @@
             <span class="kw">let </span>blue: Xyz&lt;Any, f64&gt; = DciP3Plus::&lt;P3Gamma&gt;::blue().into_color_unclamped();
             <span class="comment">// Compare sum of primaries to white point.
             </span><span class="macro">assert_relative_eq!</span>(red + green + blue, DciP3::get_xyz(), epsilon = <span class="number">0.00001</span>)
+        }
+    }
+
+    <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
+    </span><span class="kw">mod </span>transfer {
+        <span class="kw">use </span><span class="kw">crate</span>::encoding::{FromLinear, IntoLinear, P3Gamma};
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>lin_to_enc_to_lin() {
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">100 </span>{
+                <span class="kw">let </span>linear = i <span class="kw">as </span>f64 / <span class="number">100.0</span>;
+                <span class="kw">let </span>encoded: f64 = P3Gamma::from_linear(linear);
+                <span class="macro">assert_relative_eq!</span>(linear, P3Gamma::into_linear(encoded), epsilon = <span class="number">0.0000001</span>);
+            }
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>enc_to_lin_to_enc() {
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">100 </span>{
+                <span class="kw">let </span>encoded = i <span class="kw">as </span>f64 / <span class="number">100.0</span>;
+                <span class="kw">let </span>linear: f64 = P3Gamma::into_linear(encoded);
+                <span class="macro">assert_relative_eq!</span>(encoded, P3Gamma::from_linear(linear), epsilon = <span class="number">0.0000001</span>);
+            }
+        }
+    }
+
+    <span class="kw">mod </span>lut {
+        <span class="kw">use </span><span class="kw">crate</span>::encoding::{FromLinear, IntoLinear, P3Gamma};
+
+        <span class="attr">#[test]
+        #[cfg(feature = <span class="string">"approx"</span>)]
+        </span><span class="kw">fn </span>test_u8_f32_into_impl() {
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">255u8 </span>{
+                <span class="kw">let </span>u8_impl: f32 = P3Gamma::into_linear(i);
+                <span class="kw">let </span>f32_impl = P3Gamma::into_linear(i <span class="kw">as </span>f32 / <span class="number">255.0</span>);
+                <span class="macro">assert_relative_eq!</span>(u8_impl, f32_impl, epsilon = <span class="number">0.000001</span>);
+            }
+        }
+
+        <span class="attr">#[test]
+        #[cfg(feature = <span class="string">"approx"</span>)]
+        </span><span class="kw">fn </span>test_u8_f64_into_impl() {
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">255u8 </span>{
+                <span class="kw">let </span>u8_impl: f64 = P3Gamma::into_linear(i);
+                <span class="kw">let </span>f64_impl = P3Gamma::into_linear(i <span class="kw">as </span>f64 / <span class="number">255.0</span>);
+                <span class="macro">assert_relative_eq!</span>(u8_impl, f64_impl, epsilon = <span class="number">0.0000001</span>);
+            }
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>u8_to_f32_to_u8() {
+            <span class="kw">for </span>expected <span class="kw">in </span><span class="number">0u8</span>..=<span class="number">255u8 </span>{
+                <span class="kw">let </span>linear: f32 = P3Gamma::into_linear(expected);
+                <span class="kw">let </span>result: u8 = P3Gamma::from_linear(linear);
+                <span class="macro">assert_eq!</span>(result, expected);
+            }
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>u8_to_f64_to_u8() {
+            <span class="kw">for </span>expected <span class="kw">in </span><span class="number">0u8</span>..=<span class="number">255u8 </span>{
+                <span class="kw">let </span>linear: f64 = P3Gamma::into_linear(expected);
+                <span class="kw">let </span>result: u8 = P3Gamma::from_linear(linear);
+                <span class="macro">assert_eq!</span>(result, expected);
+            }
         }
     }
 }

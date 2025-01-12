@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/srgb.rs`."><title>srgb.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b0742ba02757f159.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.83.0 (90b35a623 2024-11-26)" data-channel="1.83.0" data-search-js="search-f0d225181b97f9a4.js" data-settings-js="settings-805db61a62df4bd2.js" ><script src="../../../static.files/storage-1d39b6787ed640ff.js"></script><script defer src="../../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-f070b9041d14864c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-0111fcff984fae8f.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">palette/encoding/</div>srgb.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `palette/src/encoding/srgb.rs`."><title>srgb.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-42caa33d.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="palette" data-themes="" data-resource-suffix="" data-rustdoc-version="1.84.0 (9fc6b4312 2025-01-07)" data-channel="1.84.0" data-search-js="search-92e6798f.js" data-settings-js="settings-0f613d39.js" ><script src="../../../static.files/storage-59e33391.js"></script><script defer src="../../../static.files/src-script-56102188.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">palette/encoding/</div>srgb.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -195,21 +195,64 @@
 <a href="#194" id="194">194</a>
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a></pre></div><pre class="rust"><code><span class="doccomment">//! The sRGB standard.
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a></pre></div><pre class="rust"><code><span class="doccomment">//! The sRGB standard.
 
 </span><span class="kw">use crate</span>::{
     bool_mask::LazySelect,
-    encoding::{FromLinear, IntoLinear},
+    encoding::{
+        lut::{<span class="self">self</span>, srgb::<span class="kw-2">*</span>},
+        FromLinear, IntoLinear,
+    },
     luma::LumaStandard,
     num::{Arithmetics, MulAdd, MulSub, PartialCmp, Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
     white_point::{Any, D65},
     Mat3, Yxy,
 };
-
-<span class="kw">use </span>lookup_tables::<span class="kw-2">*</span>;
-
-<span class="kw">mod </span>lookup_tables;
 
 <span class="doccomment">/// The sRGB standard, color space, and transfer function.
 ///
@@ -222,10 +265,10 @@
 /// There are some specialized cases where it has been optimized:
 ///
 /// * When converting from `u8` to `f32` or `f64`, while converting to linear
-///   space. This uses lookup tables with precomputed values. `f32` will use the
-///   table provided by [fast_srgb8::srgb8_to_f32].
+///   space. This uses lookup tables with precomputed values.
 /// * When converting from `f32` or `f64` to `u8`, while converting from linear
-///   space. This uses [fast_srgb8::f32_to_srgb8].
+///   space. This uses a fast algorithm that guarantees a maximum error in the
+///   result of less than 0.6 in line with [this DirectX spec](&lt;https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#FLOATtoSRGB&gt;).
 </span><span class="attr">#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>Srgb;
 
@@ -322,14 +365,14 @@
 <span class="kw">impl </span>IntoLinear&lt;f32, u8&gt; <span class="kw">for </span>Srgb {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>into_linear(encoded: u8) -&gt; f32 {
-        fast_srgb8::srgb8_to_f32(encoded)
+        SRGB_U8_TO_F32[encoded <span class="kw">as </span>usize]
     }
 }
 
 <span class="kw">impl </span>FromLinear&lt;f32, u8&gt; <span class="kw">for </span>Srgb {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>from_linear(linear: f32) -&gt; u8 {
-        fast_srgb8::f32_to_srgb8(linear)
+        lut::linear_f32_to_encoded_u8(linear, SRGB_MIN_FLOAT, <span class="kw-2">&amp;</span>TO_SRGB_U8)
     }
 }
 
@@ -343,14 +386,12 @@
 <span class="kw">impl </span>FromLinear&lt;f64, u8&gt; <span class="kw">for </span>Srgb {
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>from_linear(linear: f64) -&gt; u8 {
-        Srgb::from_linear(linear <span class="kw">as </span>f32)
+        &lt;Srgb&gt;::from_linear(linear <span class="kw">as </span>f32)
     }
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
-    <span class="kw">use </span><span class="kw">crate</span>::encoding::{FromLinear, IntoLinear, Srgb};
-
     <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
     </span><span class="kw">mod </span>conversion {
         <span class="kw">use crate</span>::{
@@ -374,21 +415,68 @@
         }
     }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>u8_to_f32_to_u8() {
-        <span class="kw">for </span>expected <span class="kw">in </span><span class="number">0u8</span>..=<span class="number">255u8 </span>{
-            <span class="kw">let </span>linear: f32 = Srgb::into_linear(expected);
-            <span class="kw">let </span>result: u8 = Srgb::from_linear(linear);
-            <span class="macro">assert_eq!</span>(result, expected);
+    <span class="attr">#[cfg(feature = <span class="string">"approx"</span>)]
+    </span><span class="kw">mod </span>transfer {
+        <span class="kw">use </span><span class="kw">crate</span>::encoding::{FromLinear, IntoLinear, Srgb};
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>lin_to_enc_to_lin() {
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">100 </span>{
+                <span class="kw">let </span>linear = i <span class="kw">as </span>f64 / <span class="number">100.0</span>;
+                <span class="kw">let </span>encoded: f64 = Srgb::from_linear(linear);
+                <span class="macro">assert_relative_eq!</span>(linear, Srgb::into_linear(encoded), epsilon = <span class="number">0.0000001</span>);
+            }
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>enc_to_lin_to_enc() {
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">100 </span>{
+                <span class="kw">let </span>encoded = i <span class="kw">as </span>f64 / <span class="number">100.0</span>;
+                <span class="kw">let </span>linear: f64 = Srgb::into_linear(encoded);
+                <span class="macro">assert_relative_eq!</span>(encoded, Srgb::from_linear(linear), epsilon = <span class="number">0.0000001</span>);
+            }
         }
     }
 
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>u8_to_f64_to_u8() {
-        <span class="kw">for </span>expected <span class="kw">in </span><span class="number">0u8</span>..=<span class="number">255u8 </span>{
-            <span class="kw">let </span>linear: f64 = Srgb::into_linear(expected);
-            <span class="kw">let </span>result: u8 = Srgb::from_linear(linear);
-            <span class="macro">assert_eq!</span>(result, expected);
+    <span class="kw">mod </span>lut {
+        <span class="kw">use </span><span class="kw">crate</span>::encoding::{FromLinear, IntoLinear, Srgb};
+
+        <span class="attr">#[test]
+        #[cfg(feature = <span class="string">"approx"</span>)]
+        </span><span class="kw">fn </span>test_u8_f32_into_impl() {
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">255u8 </span>{
+                <span class="kw">let </span>u8_impl: f32 = Srgb::into_linear(i);
+                <span class="kw">let </span>f32_impl = Srgb::into_linear(i <span class="kw">as </span>f32 / <span class="number">255.0</span>);
+                <span class="macro">assert_relative_eq!</span>(u8_impl, f32_impl, epsilon = <span class="number">0.000001</span>);
+            }
+        }
+
+        <span class="attr">#[test]
+        #[cfg(feature = <span class="string">"approx"</span>)]
+        </span><span class="kw">fn </span>test_u8_f64_into_impl() {
+            <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..=<span class="number">255u8 </span>{
+                <span class="kw">let </span>u8_impl: f64 = Srgb::into_linear(i);
+                <span class="kw">let </span>f64_impl = Srgb::into_linear(i <span class="kw">as </span>f64 / <span class="number">255.0</span>);
+                <span class="macro">assert_relative_eq!</span>(u8_impl, f64_impl, epsilon = <span class="number">0.0000001</span>);
+            }
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>u8_to_f32_to_u8() {
+            <span class="kw">for </span>expected <span class="kw">in </span><span class="number">0</span>..=<span class="number">255u8 </span>{
+                <span class="kw">let </span>linear: f32 = Srgb::into_linear(expected);
+                <span class="kw">let </span>result: u8 = Srgb::from_linear(linear);
+                <span class="macro">assert_eq!</span>(result, expected);
+            }
+        }
+
+        <span class="attr">#[test]
+        </span><span class="kw">fn </span>u8_to_f64_to_u8() {
+            <span class="kw">for </span>expected <span class="kw">in </span><span class="number">0</span>..=<span class="number">255u8 </span>{
+                <span class="kw">let </span>linear: f64 = Srgb::into_linear(expected);
+                <span class="kw">let </span>result: u8 = Srgb::from_linear(linear);
+                <span class="macro">assert_eq!</span>(result, expected);
+            }
         }
     }
 }
