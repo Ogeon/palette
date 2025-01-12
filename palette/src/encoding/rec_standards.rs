@@ -3,7 +3,10 @@
 
 use crate::{
     bool_mask::LazySelect,
-    encoding::{FromLinear, IntoLinear, Srgb},
+    encoding::{
+        lut::{self, rec_standards::*},
+        FromLinear, IntoLinear, Srgb,
+    },
     luma::LumaStandard,
     num::{Arithmetics, MulAdd, MulSub, PartialCmp, Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
@@ -11,17 +14,7 @@ use crate::{
     Mat3, Yxy,
 };
 
-use lookup_tables::*;
-
-mod lookup_tables;
-
-/// The Rec. 2020 standard, color space, and transfer function.
-///
-/// # As transfer function
-///
-/// `Rec2020` will not use any kind of approximation when converting from `T` to
-/// `T`. This involves calls to `powf`, which may make it too slow for certain
-/// applications.
+/// The Rec. 2020 standard, color space, and transfer function ([`RecOetf`]).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Rec2020;
 
@@ -78,13 +71,7 @@ impl LumaStandard for Rec2020 {
     type TransferFn = RecOetf;
 }
 
-/// The Rec. 709 standard, color space, and transfer function.
-///
-/// # As transfer function
-///
-/// `Rec709` will not use any kind of approximation when converting from `T` to
-/// `T`. This involves calls to `powf`, which may make it too slow for certain
-/// applications.
+/// The Rec. 709 standard, color space, and transfer function ([`RecOetf`]).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Rec709;
 
@@ -100,6 +87,18 @@ impl LumaStandard for Rec709 {
 
 /// The opto-electronic transfer function used in standard dynamic range (SDR)
 /// standards by the ITU-R such as [`Rec709`] and [`Rec2020`].
+///
+/// `RecOetf` will not use any kind of approximation when converting from `T` to
+/// `T`. This involves calls to `powf`, which may make it too slow for certain
+/// applications.
+///
+/// There are some specialized cases where it has been optimized:
+///
+/// * When converting from `u8` to `f32` or `f64`, while converting to linear
+///   space. This uses lookup tables with precomputed values.
+/// * When converting from `f32` or `f64` to `u8`, while converting from linear
+///   space. This uses a fast algorithm that guarantees a maximum error in the
+///   result of less than 0.6 in line with [this DirectX spec](<https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#FLOATtoSRGB>).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct RecOetf;
 
@@ -144,57 +143,7 @@ impl IntoLinear<f32, u8> for RecOetf {
 impl FromLinear<f32, u8> for RecOetf {
     #[inline]
     fn from_linear(linear: f32) -> u8 {
-        // Algorithm modeled closely off of `f32_to_srgb8` from fast-srgb8 crate
-        const MAX_FLOAT_BITS: u32 = 0x3f7fffff; // 1.0 - f32::EPSILON
-        const MIN_FLOAT_BITS: u32 = 0x39000000; // 2^(-13)
-        let max_float = f32::from_bits(MAX_FLOAT_BITS);
-        let min_float = f32::from_bits(MIN_FLOAT_BITS);
-
-        let mut input = linear;
-        // Implemented this way to map NaN to `min_float`
-        if input.partial_cmp(&min_float) != Some(core::cmp::Ordering::Greater) {
-            input = min_float;
-        } else if input > max_float {
-            input = max_float;
-        }
-        let input_bits = input.to_bits();
-        #[cfg(test)]
-        {
-            debug_assert!((MIN_FLOAT_BITS..=MAX_FLOAT_BITS).contains(&input_bits));
-        }
-        // Safety: all input floats are clamped into the {min_float, max_float} range,
-        // which turns out in this case to guarantee that their bitwise reprs are
-        // clamped to the {MIN_FLOAT_BITS, MAX_FLOAT_BITS} range (guaranteed by the
-        // fact that min_float/max_float are the normal, finite, the same sign, and
-        // not zero).
-        //
-        // Because of that, the smallest result of `input_bits - MIN_FLOAT_BITS` is 0
-        // (when `input_bits` is `MIN_FLOAT_BITS`), and the largest is `0x067fffff`,
-        // (when `input_bits` is `MAX_FLOAT_BITS`). `0x067fffff >> 20` is 0x67, e.g. 103,
-        // and thus all possible results are inbounds for the (104 item) table.
-        // This is all verified in test code.
-        //
-        // Note that the compiler can't figure this out on it's own, so the
-        // get_unchecked does help some.
-        let entry = {
-            let i = ((input_bits - MIN_FLOAT_BITS) >> 20) as usize;
-            #[cfg(test)]
-            {
-                debug_assert!(TO_REC_OETF_U8.get(i).is_some());
-            }
-            unsafe { *TO_REC_OETF_U8.get_unchecked(i) }
-        };
-
-        let bias = (entry >> 16) << 9;
-        let scale = entry & 0xffff;
-
-        let t = (input_bits >> 12) & 0xff;
-        let res = (bias + scale * t) >> 16;
-        #[cfg(test)]
-        {
-            debug_assert!(res < 256, "{}", res);
-        }
-        res as u8
+        lut::linear_f32_to_encoded_u8(linear, REC_OETF_MIN_FLOAT, &TO_REC_OETF_U8)
     }
 }
 
@@ -208,7 +157,7 @@ impl IntoLinear<f64, u8> for RecOetf {
 impl FromLinear<f64, u8> for RecOetf {
     #[inline]
     fn from_linear(linear: f64) -> u8 {
-        RecOetf::from_linear(linear as f32)
+        <RecOetf>::from_linear(linear as f32)
     }
 }
 
@@ -239,7 +188,7 @@ mod test {
 
     #[cfg(feature = "approx")]
     mod transfer {
-        use crate::encoding::{rec_standards::RecOetf, FromLinear, IntoLinear};
+        use crate::encoding::{FromLinear, IntoLinear, RecOetf};
 
         #[test]
         fn lin_to_enc_to_lin() {
@@ -258,17 +207,23 @@ mod test {
                 assert_relative_eq!(encoded, RecOetf::from_linear(linear), epsilon = 0.0000001);
             }
         }
+    }
+
+    mod lut {
+        use crate::encoding::{FromLinear, IntoLinear, RecOetf};
 
         #[test]
+        #[cfg(feature = "approx")]
         fn test_u8_f32_into_impl() {
             for i in 0..=255u8 {
                 let u8_impl: f32 = RecOetf::into_linear(i);
                 let f32_impl = RecOetf::into_linear(i as f32 / 255.0);
-                assert_relative_eq!(u8_impl, f32_impl, epsilon = 0.0000001);
+                assert_relative_eq!(u8_impl, f32_impl, epsilon = 0.000001);
             }
         }
 
         #[test]
+        #[cfg(feature = "approx")]
         fn test_u8_f64_into_impl() {
             for i in 0..=255u8 {
                 let u8_impl: f64 = RecOetf::into_linear(i);
