@@ -6,6 +6,7 @@
 //! prevent accidental mixups.
 
 pub use self::adobe::AdobeRgb;
+#[allow(deprecated)]
 pub use self::gamma::{F2p2, Gamma};
 pub use self::linear::Linear;
 pub use self::p3::{DciP3, DciP3Plus, DisplayP3, P3Gamma};
@@ -14,6 +15,10 @@ pub use self::rec_standards::{Rec2020, Rec709, RecOetf};
 pub use self::srgb::Srgb;
 
 pub mod adobe;
+#[deprecated(
+    since = "0.7.7",
+    note = "`Gamma`, `GammaFn` and `F2p2` are error prone and incorrectly implemented. See `palette::encoding` for possible alternatives or implement `palette::encoding::FromLinear` and `palette::encoding::IntoLinear` for a custom type."
+)]
 pub mod gamma;
 pub mod linear;
 pub mod p3;
