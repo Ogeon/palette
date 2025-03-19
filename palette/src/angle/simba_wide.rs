@@ -30,7 +30,7 @@ macro_rules! impl_angle_simba_float {
 
                 #[inline(always)]
                 fn radians_to_degrees(self) -> Self {
-                    let pis_in_180 = Self::from_subset(&(57.2957795130823208767981548141051703 as $scalar_ty));
+                    let pis_in_180 = Self::from_subset(&(180.0 as $scalar_ty)) / $ty::simd_pi();
                     self * pis_in_180
                 }
             }
