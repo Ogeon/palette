@@ -60,3 +60,183 @@ macro_rules! impl_angle_simba_float {
 }
 
 impl_angle_simba_float!(WideF32x4(f32), WideF32x8(f32), WideF64x4(f64));
+
+#[cfg(test)]
+mod test {
+    use std::cmp::Ordering;
+    use crate::num::{IntoScalarArray};
+    use super::*;
+
+    #[test]
+    fn test_half_rotation() {
+        assert_eq!(WideF32x4::half_rotation().into_array().partial_cmp(&[180.0f32, 180.0f32, 180.0f32, 180.0f32]).unwrap(), Ordering::Equal);
+        assert_eq!(WideF32x8::half_rotation().into_array().partial_cmp(&[180.0f32, 180.0f32, 180.0f32, 180.0f32, 180.0f32, 180.0f32, 180.0f32, 180.0f32]).unwrap(), Ordering::Equal);
+
+        assert_eq!(WideF64x4::half_rotation().into_array().partial_cmp(&[180.0f64, 180.0f64, 180.0f64, 180.0f64]).unwrap(), Ordering::Equal);
+    }
+
+    #[test]
+    fn test_full_rotation() {
+        assert_eq!(WideF32x4::full_rotation().into_array().partial_cmp(&[360.0f32, 360.0f32, 360.0f32, 360.0f32]).unwrap(), Ordering::Equal);
+        assert_eq!(WideF32x8::full_rotation().into_array().partial_cmp(&[360.0f32, 360.0f32, 360.0f32, 360.0f32, 360.0f32, 360.0f32, 360.0f32, 360.0f32]).unwrap(), Ordering::Equal);
+        assert_eq!(WideF64x4::full_rotation().into_array().partial_cmp(&[360.0f64, 360.0f64, 360.0f64, 360.0f64]).unwrap(), Ordering::Equal);
+    }
+
+    #[test]
+    fn test_degrees_to_radians() {
+        assert_eq!(WideF32x4::half_rotation().degrees_to_radians(), WideF32x4::simd_pi());
+        assert_eq!(WideF32x8::half_rotation().degrees_to_radians(), WideF32x8::simd_pi());
+        assert_eq!(WideF64x4::half_rotation().degrees_to_radians(), WideF64x4::simd_pi());
+
+        assert_eq!(WideF32x4::full_rotation().degrees_to_radians(), WideF32x4::simd_two_pi());
+        assert_eq!(WideF32x8::full_rotation().degrees_to_radians(), WideF32x8::simd_two_pi());
+        assert_eq!(WideF64x4::full_rotation().degrees_to_radians(), WideF64x4::simd_two_pi());
+    }
+
+    #[test]
+    fn test_radians_to_degrees() {
+        assert_eq!(WideF32x4::simd_pi().radians_to_degrees(), WideF32x4::half_rotation());
+        assert_eq!(WideF32x8::simd_pi().radians_to_degrees(), WideF32x8::half_rotation());
+        assert_eq!(WideF64x4::simd_pi().radians_to_degrees(), WideF64x4::half_rotation());
+
+        assert_eq!(WideF32x4::simd_two_pi().radians_to_degrees(), WideF32x4::full_rotation());
+        assert_eq!(WideF32x8::simd_two_pi().radians_to_degrees(), WideF32x8::full_rotation());
+        assert_eq!(WideF64x4::simd_two_pi().radians_to_degrees(), WideF64x4::full_rotation());
+    }
+
+    #[test]
+    fn test_normalize_signed_angle() {
+        assert_eq!(
+            WideF32x4::from_subset(&-365.0).normalize_signed_angle(),
+            WideF32x4::from_subset(&-5.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&-365.0).normalize_signed_angle(),
+            WideF32x8::from_subset(&-5.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&-365.0).normalize_signed_angle(),
+            WideF64x4::from_subset(&-5.0)
+        );
+
+        assert_eq!(
+            WideF32x4::from_subset(&-360.0).normalize_signed_angle(),
+            WideF32x4::from_subset(&-0.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&-360.0).normalize_signed_angle(),
+            WideF32x8::from_subset(&-0.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&-360.0).normalize_signed_angle(),
+            WideF64x4::from_subset(&-0.0)
+        );
+
+        assert_eq!(
+            WideF32x4::from_subset(&0.0).normalize_signed_angle(),
+            WideF32x4::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&0.0).normalize_signed_angle(),
+            WideF32x8::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&0.0).normalize_signed_angle(),
+            WideF64x4::from_subset(&0.0)
+        );
+
+        assert_eq!(
+            WideF32x4::from_subset(&360.0).normalize_signed_angle(),
+            WideF32x4::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&360.0).normalize_signed_angle(),
+            WideF32x8::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&360.0).normalize_signed_angle(),
+            WideF64x4::from_subset(&0.0)
+        );
+
+        assert_eq!(
+            WideF32x4::from_subset(&365.0).normalize_signed_angle(),
+            WideF32x4::from_subset(&5.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&365.0).normalize_signed_angle(),
+            WideF32x8::from_subset(&5.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&365.0).normalize_signed_angle(),
+            WideF64x4::from_subset(&5.0)
+        );
+    }
+
+    #[test]
+    fn test_normalize_unsigned_angle() {
+        assert_eq!(
+            WideF32x4::from_subset(&-365.0).normalize_unsigned_angle(),
+            WideF32x4::from_subset(&355.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&-365.0).normalize_unsigned_angle(),
+            WideF32x8::from_subset(&355.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&-365.0).normalize_unsigned_angle(),
+            WideF64x4::from_subset(&355.0)
+        );
+
+        assert_eq!(
+            WideF32x4::from_subset(&-360.0).normalize_unsigned_angle(),
+            WideF32x4::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&-360.0).normalize_unsigned_angle(),
+            WideF32x8::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&-360.0).normalize_unsigned_angle(),
+            WideF64x4::from_subset(&0.0)
+        );
+
+        assert_eq!(
+            WideF32x4::from_subset(&0.0).normalize_unsigned_angle(),
+            WideF32x4::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&0.0).normalize_unsigned_angle(),
+            WideF32x8::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&0.0).normalize_unsigned_angle(),
+            WideF64x4::from_subset(&0.0)
+        );
+
+        assert_eq!(
+            WideF32x4::from_subset(&360.0).normalize_unsigned_angle(),
+            WideF32x4::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&360.0).normalize_unsigned_angle(),
+            WideF32x8::from_subset(&0.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&360.0).normalize_unsigned_angle(),
+            WideF64x4::from_subset(&0.0)
+        );
+
+        assert_eq!(
+            WideF32x4::from_subset(&365.0).normalize_unsigned_angle(),
+            WideF32x4::from_subset(&5.0)
+        );
+        assert_eq!(
+            WideF32x8::from_subset(&365.0).normalize_unsigned_angle(),
+            WideF32x8::from_subset(&5.0)
+        );
+        assert_eq!(
+            WideF64x4::from_subset(&365.0).normalize_unsigned_angle(),
+            WideF64x4::from_subset(&5.0)
+        );
+    }
+}
