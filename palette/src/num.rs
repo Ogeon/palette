@@ -21,6 +21,9 @@ mod libm;
 #[cfg(feature = "wide")]
 mod wide;
 
+#[cfg(all(feature = "simba", feature = "wide"))]
+mod simba_wide;
+
 /// Numbers that belong to the real number set. It's both a semantic marker and
 /// provides a constructor for number constants.
 pub trait Real {

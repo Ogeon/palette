@@ -34,6 +34,7 @@ find-crate = ["palette_derive/find-crate"]
 std = ["alloc", "approx?/std"]
 alloc = []
 gamma_lut_u16 = []
+wide = ["dep:wide", "simba?/wide"]
 
 # Deprecated. Alias for `"named"`.
 named_from_str = ["named"]
@@ -69,6 +70,10 @@ optional = true
 version = "0.7.3"
 optional = true
 default-features = false
+
+[dependencies.simba]
+version = "0.9"
+optional = true
 
 [dev-dependencies]
 serde_json = "1.0.0"
