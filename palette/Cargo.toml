@@ -21,8 +21,7 @@ repository = "https://github.com/Ogeon/palette"
 readme = "README.md"
 keywords = ["color", "conversion", "linear", "pixel", "rgb"]
 license = "MIT OR Apache-2.0"
-edition = "2018"
-resolver = "2"
+edition = "2021"
 categories = ["graphics", "multimedia::images", "no-std"]
 rust-version = "1.61.0"
 
