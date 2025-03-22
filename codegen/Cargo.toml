@@ -6,7 +6,7 @@ exclude = []
 description = "Code generation crate for palette."
 repository = "https://github.com/Ogeon/palette"
 license = "MIT OR Apache-2.0"
-edition = "2018"
+edition = "2021"
 publish = false
 
 [dependencies]

@@ -6,7 +6,7 @@ exclude = []
 description = "Benchmark crate for palette."
 repository = "https://github.com/Ogeon/palette"
 license = "MIT OR Apache-2.0"
-edition = "2018"
+edition = "2021"
 publish = false
 
 [[bench]]
@@ -24,17 +24,13 @@ path = "benches/matrix.rs"
 name = "matrix"
 harness = false
 
-[features]
-# Avoids getting these features included in other packages in the same workspace.
-all_features = ["palette/default", "palette/wide"]
-
 [dev-dependencies]
 approx = { version = "0.5", default-features = false }
 codspeed-criterion-compat = "2.1.0"
 criterion = { version = "0.5.1", default-features = false }
 csv = "1"
 lazy_static = "1"
-palette = { path = "../palette", default-features = false }
+palette = { path = "../palette", features = ["wide"] }
 serde = "1"
 serde_derive = "1"
 wide = "0.7.3"
