@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "nightly", feature(start))]
+#![cfg_attr(feature = "nightly", no_main)]
 #![no_std]
 
 #[cfg(feature = "nightly")]
@@ -7,8 +7,8 @@ use core::panic::PanicInfo;
 extern crate libc;
 
 #[cfg(feature = "nightly")]
-#[start]
-fn start(_argc: isize, _argv: *const *const u8) -> isize {
+#[no_mangle]
+pub extern "C" fn main(_argc: isize, _argv: *const *const u8) -> isize {
     let _magenta = palette::Srgb::new(255u8, 0, 255);
 
     0
