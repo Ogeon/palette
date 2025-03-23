@@ -31,10 +31,11 @@ named = ["phf"]
 random = ["rand"]
 serializing = ["serde", "std"]
 find-crate = ["palette_derive/find-crate"]
-std = ["alloc", "approx?/std"]
+std = ["alloc", "approx?/std", "wide?/std", "simba?/std"]
 alloc = []
 gamma_lut_u16 = []
 wide = ["dep:wide", "simba?/wide"]
+libm = ["dep:libm", "simba?/libm", "simba?/libm_force"]
 
 # Deprecated. Alias for `"named"`.
 named_from_str = ["named"]
@@ -74,6 +75,7 @@ default-features = false
 [dependencies.simba]
 version = "0.9.0"
 optional = true
+default-features = false
 
 [dev-dependencies]
 serde_json = "1.0.0"
