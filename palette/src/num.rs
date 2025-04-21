@@ -21,6 +21,8 @@ mod libm;
 #[cfg(feature = "wide")]
 mod wide;
 
+pub use palette_math::num::{One, Powf, Powi, Powu, Recip};
+
 /// Numbers that belong to the real number set. It's both a semantic marker and
 /// provides a constructor for number constants.
 pub trait Real {
@@ -60,13 +62,6 @@ pub trait Zero {
     /// Create a new `0` value.
     #[must_use]
     fn zero() -> Self;
-}
-
-/// Methods for the value `1`.
-pub trait One {
-    /// Create a new `1` value.
-    #[must_use]
-    fn one() -> Self;
 }
 
 /// A helper trait that collects arithmetic traits under one name.
@@ -171,37 +166,6 @@ pub trait Cbrt {
     /// Returns the cube root of `self`.
     #[must_use]
     fn cbrt(self) -> Self;
-}
-
-/// Method for raising a number by a real number exponent.
-///
-/// The name "powf" is kept for familiarity, even though the exponent doesn't
-/// have to be a floating point number.
-pub trait Powf {
-    /// Return `self` raised to the power of `exp`.
-    #[must_use]
-    fn powf(self, exp: Self) -> Self;
-}
-
-/// Method for raising a number by a signed integer exponent.
-pub trait Powi {
-    /// Return `self` raised to the power of `exp`.
-    #[must_use]
-    fn powi(self, exp: i32) -> Self;
-}
-
-/// Method for raising a number by a n unsigned integer exponent.
-pub trait Powu {
-    /// Return `self` raised to the power of `exp`.
-    #[must_use]
-    fn powu(self, exp: u32) -> Self;
-}
-
-/// Method for calculating `1 / x`.
-pub trait Recip {
-    /// Return `1 / self`.
-    #[must_use]
-    fn recip(self) -> Self;
 }
 
 /// Methods for calculating `e ^ x`,
@@ -356,13 +320,6 @@ macro_rules! impl_uint {
                 }
             }
 
-            impl One for $ty {
-                #[inline]
-                fn one() -> Self {
-                    1
-                }
-            }
-
             impl MinMax for $ty {
                 #[inline]
                 fn min(self, other: Self) -> Self {
@@ -381,13 +338,6 @@ macro_rules! impl_uint {
                     } else {
                         (self, other)
                     }
-                }
-            }
-
-            impl Powu for $ty {
-                #[inline]
-                fn powu(self, exp: u32) -> Self {
-                    pow(self, exp)
                 }
             }
 
@@ -506,13 +456,6 @@ macro_rules! impl_float {
                 }
             }
 
-            impl One for $ty {
-                #[inline]
-                fn one() -> Self {
-                    1.0
-                }
-            }
-
             impl MinMax for $ty {
                 #[inline]
                 fn max(self, other: Self) -> Self {
@@ -531,13 +474,6 @@ macro_rules! impl_float {
                     } else {
                         (self, other)
                     }
-                }
-            }
-
-            impl Powu for $ty {
-                #[inline]
-                fn powu(self, exp: u32) -> Self {
-                    pow(self, exp)
                 }
             }
 
@@ -612,30 +548,6 @@ macro_rules! impl_float {
                 #[inline]
                 fn cbrt(self) -> Self {
                     $ty::cbrt(self)
-                }
-            }
-
-            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
-            impl Powf for $ty {
-                #[inline]
-                fn powf(self, exp: Self) -> Self {
-                    $ty::powf(self, exp)
-                }
-            }
-
-            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
-            impl Powi for $ty {
-                #[inline]
-                fn powi(self, exp: i32) -> Self {
-                    $ty::powi(self, exp)
-                }
-            }
-
-            #[cfg(any(feature = "std", all(test, not(feature = "libm"))))]
-            impl Recip for $ty {
-                #[inline]
-                fn recip(self) -> Self {
-                    $ty::recip(self)
                 }
             }
 
@@ -743,46 +655,6 @@ macro_rules! impl_float {
 
 impl_uint!(u8, u16, u32, u64, u128);
 impl_float!(f32, f64);
-
-/// "borrowed" from num_traits
-///
-/// Raises a value to the power of exp, using exponentiation by squaring.
-///
-/// Note that `0⁰` (`pow(0, 0)`) returns `1`. Mathematically this is undefined.
-//
-// # Example
-//
-// ```rust
-// use num_traits::pow;
-//
-// assert_eq!(pow(2i8, 4), 16);
-// assert_eq!(pow(6u8, 3), 216);
-// assert_eq!(pow(0u8, 0), 1); // Be aware if this case affects you
-// ```
-#[inline]
-fn pow<T: Clone + One + Mul<T, Output = T>>(mut base: T, mut exp: u32) -> T {
-    if exp == 0 {
-        return T::one();
-    }
-
-    while exp & 1 == 0 {
-        base = base.clone() * base;
-        exp >>= 1;
-    }
-    if exp == 1 {
-        return base;
-    }
-
-    let mut acc = base.clone();
-    while exp > 1 {
-        exp >>= 1;
-        base = base.clone() * base;
-        if exp & 1 == 1 {
-            acc = acc * base.clone();
-        }
-    }
-    acc
-}
 
 /// Trait for lanewise comparison of two values.
 ///

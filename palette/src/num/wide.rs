@@ -43,13 +43,6 @@ macro_rules! impl_wide_float {
                 }
             }
 
-            impl One for $ty {
-                #[inline]
-                fn one() -> Self {
-                    $ty::ONE
-                }
-            }
-
             impl MinMax for $ty {
                 #[inline]
                 fn max(self, other: Self) -> Self {
@@ -64,13 +57,6 @@ macro_rules! impl_wide_float {
                 #[inline]
                 fn min_max(self, other: Self) -> (Self, Self) {
                     ($ty::min(self, other), $ty::max(self, other))
-                }
-            }
-
-            impl Powu for $ty {
-                #[inline]
-                fn powu(self, exp: u32) -> Self {
-                    pow(self, exp)
                 }
             }
 
@@ -149,32 +135,6 @@ macro_rules! impl_wide_float {
                     array.into()
                 }
             }
-
-            impl Powf for $ty {
-                #[inline]
-                fn powf(self, exp: Self) -> Self {
-                    $ty::$pow_self(self, exp)
-                }
-            }
-
-            impl Powi for $ty {
-                #[inline]
-                fn powi(mut self, mut exp: i32) -> Self {
-                    if exp < 0 {
-                        exp = exp.wrapping_neg();
-                        self = self.recip();
-                    }
-
-                    Powu::powu(self, exp as u32)
-                }
-            }
-
-            // impl Recip for $ty {
-            //     #[inline]
-            //     fn recip(self) -> Self {
-            //         $ty::recip(self)
-            //     }
-            // }
 
             impl Exp for $ty {
                 #[inline]
@@ -334,31 +294,3 @@ impl_wide_float!(
         powf: pow_f64x4,
     }
 );
-
-impl Recip for f32x4 {
-    #[inline]
-    fn recip(self) -> Self {
-        f32x4::recip(self)
-    }
-}
-
-impl Recip for f32x8 {
-    #[inline]
-    fn recip(self) -> Self {
-        f32x8::recip(self)
-    }
-}
-
-impl Recip for f64x2 {
-    #[inline]
-    fn recip(self) -> Self {
-        f64x2::ONE / self
-    }
-}
-
-impl Recip for f64x4 {
-    #[inline]
-    fn recip(self) -> Self {
-        f64x4::ONE / self
-    }
-}

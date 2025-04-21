@@ -13,3 +13,6 @@ component_management:
     - component_id: palette_derive
       paths:
         - palette_derive/**
+    - component_id: palette_math
+      paths:
+        - palette_math/**
