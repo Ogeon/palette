@@ -355,6 +355,7 @@ mod test {
 
     // Jab and Jmh have the same delta E.
     #[test]
+    #[cfg_attr(miri, ignore)]
     #[cfg(all(feature = "approx", feature = "alloc"))]
     fn jab_delta_e_equality() {
         let mut jab_colors: Vec<Cam16UcsJab<f64>> = alloc::vec::Vec::new();
@@ -385,6 +386,7 @@ mod test {
     // Jab and Jmh have the same delta E, so should also have the same improved
     // delta E.
     #[test]
+    #[cfg_attr(miri, ignore)]
     #[cfg(all(feature = "approx", feature = "alloc"))]
     fn jab_improved_delta_e_equality() {
         let mut jab_colors: Vec<Cam16UcsJab<f64>> = alloc::vec::Vec::new();

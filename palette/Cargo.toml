@@ -31,9 +31,10 @@ named = ["phf"]
 random = ["rand"]
 serializing = ["serde", "std"]
 find-crate = ["palette_derive/find-crate"]
-std = ["alloc", "approx?/std"]
-alloc = []
-gamma_lut_u16 = []
+std = ["alloc", "approx?/std", "palette_math/std"]
+alloc = ["palette_math/alloc"]
+libm = ["dep:libm", "palette_math/libm"]
+wide = ["dep:wide", "palette_math/wide"]
 
 # Deprecated. Alias for `"named"`.
 named_from_str = ["named"]
@@ -43,6 +44,7 @@ bench = false
 
 [dependencies]
 palette_derive = { version = "0.7.6", path = "../palette_derive" }
+palette_math = { version = "0.7.6", path = "../palette_math", default-features = false}
 approx = { version = "0.5.0", default-features = false, optional = true }
 libm = { version = "0.2.1", default-features = false, optional = true }
 

@@ -398,6 +398,7 @@ mod test {
     // Lab and Lch have the same delta E.
     #[cfg(all(feature = "alloc", feature = "approx"))]
     #[test]
+    #[cfg_attr(miri, ignore)]
     fn lab_delta_e_equality() {
         let mut lab_colors: Vec<Lab<D65, f64>> = Vec::new();
 
@@ -428,6 +429,7 @@ mod test {
     // delta E.
     #[cfg(all(feature = "alloc", feature = "approx"))]
     #[test]
+    #[cfg_attr(miri, ignore)]
     fn lab_improved_delta_e_equality() {
         let mut lab_colors: Vec<Lab<D65, f64>> = Vec::new();
 

@@ -275,6 +275,8 @@ extern crate serde as _;
 #[cfg(all(test, feature = "serializing"))]
 extern crate serde_json;
 
+pub use palette_math as math;
+
 use core::ops::{BitAndAssign, Neg};
 
 use bool_mask::{BoolMask, HasBoolMask};
