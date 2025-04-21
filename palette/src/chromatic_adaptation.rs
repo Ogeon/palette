@@ -124,7 +124,7 @@ use crate::{
 /// simple_white_balance(&mut image);
 ///
 /// let expected = Srgb::new(0.524706, 0.524706, 0.524706);
-/// assert_relative_eq!(image[0], expected, epsilon = 0.000001);
+/// assert_relative_eq!(image[0], expected, epsilon = 0.00001);
 /// ```
 ///
 /// See also [Wikipedia - Von Kries transform][wikipedia].

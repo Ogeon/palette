@@ -1,18 +1,22 @@
 //! The ITU-R Recommendation BT.2020 (Rec. 2020) and BT.709 (Rec. 709) standards and their
 //! associated transfer function.
 
+use palette_math::{
+    gamma::lut::GammaLutBuilder,
+    lut::{ArrayTable, SliceTable},
+};
+
 use crate::{
     bool_mask::LazySelect,
-    encoding::{
-        lut::{self, rec_standards::*},
-        FromLinear, IntoLinear, Srgb,
-    },
+    encoding::{lut::rec_standards::*, FromLinear, IntoLinear, Srgb},
     luma::LumaStandard,
     num::{Arithmetics, MulAdd, MulSub, PartialCmp, Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
     white_point::{Any, D65},
     Mat3, Yxy,
 };
+
+use super::{FromLinearLut, GetLutBuilder, IntoLinearLut};
 
 /// The Rec. 2020 standard, color space, and transfer function ([`RecOetf`]).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -102,6 +106,29 @@ impl LumaStandard for Rec709 {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct RecOetf;
 
+impl RecOetf {
+    /// Access the pre-generated lookup table for non-linear `u8` to linear `f32` conversion.
+    pub fn get_u8_to_f32_lut() -> IntoLinearLut<u8, f32, Self, &'static ArrayTable<256>> {
+        IntoLinearLut::from(REC_OETF_U8_TO_F32.get_ref())
+    }
+
+    /// Access the pre-generated lookup table for non-linear `u8` to linear `f64` conversion.
+    pub fn get_u8_to_f64_lut() -> IntoLinearLut<u8, f64, Self, &'static ArrayTable<256>> {
+        IntoLinearLut::from(REC_OETF_U8_TO_F64.get_ref())
+    }
+
+    /// Access the pre-generated lookup table for linear `f32` to non-linear `u8` conversion.
+    pub fn get_f32_to_u8_lut() -> FromLinearLut<f32, u8, Self, &'static SliceTable> {
+        FromLinearLut::from_table(REC_OETF_F32_TO_U8.get_slice())
+    }
+}
+
+impl GetLutBuilder for RecOetf {
+    fn get_lut_builder() -> GammaLutBuilder {
+        palette_math::gamma::rec_oetf_builder()
+    }
+}
+
 const ALPHA: f64 = 1.09929682680944;
 const BETA: f64 = 0.018053968510807;
 
@@ -136,21 +163,21 @@ where
 impl IntoLinear<f32, u8> for RecOetf {
     #[inline]
     fn into_linear(encoded: u8) -> f32 {
-        REC_OETF_U8_TO_F32[encoded as usize]
+        *REC_OETF_U8_TO_F32.lookup(encoded)
     }
 }
 
 impl FromLinear<f32, u8> for RecOetf {
     #[inline]
     fn from_linear(linear: f32) -> u8 {
-        lut::linear_f32_to_encoded_u8(linear, REC_OETF_MIN_FLOAT, &TO_REC_OETF_U8)
+        REC_OETF_F32_TO_U8.lookup(linear)
     }
 }
 
 impl IntoLinear<f64, u8> for RecOetf {
     #[inline]
     fn into_linear(encoded: u8) -> f64 {
-        REC_OETF_U8_TO_F64[encoded as usize]
+        *REC_OETF_U8_TO_F64.lookup(encoded)
     }
 }
 
@@ -210,9 +237,13 @@ mod test {
     }
 
     mod lut {
-        use crate::encoding::{FromLinear, IntoLinear, RecOetf};
+        use crate::{
+            encoding::{FromLinear, IntoLinear, RecOetf},
+            rgb,
+        };
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         #[cfg(feature = "approx")]
         fn test_u8_f32_into_impl() {
             for i in 0..=255u8 {
@@ -223,6 +254,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         #[cfg(feature = "approx")]
         fn test_u8_f64_into_impl() {
             for i in 0..=255u8 {
@@ -233,6 +265,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u8_to_f32_to_u8() {
             for expected in 0u8..=255u8 {
                 let linear: f32 = RecOetf::into_linear(expected);
@@ -242,12 +275,30 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u8_to_f64_to_u8() {
             for expected in 0u8..=255u8 {
                 let linear: f64 = RecOetf::into_linear(expected);
                 let result: u8 = RecOetf::from_linear(linear);
                 assert_eq!(result, expected);
             }
+        }
+
+        #[test]
+        fn constant_lut() {
+            let decode_lut = RecOetf::get_u8_to_f32_lut();
+            let decode_lut_64 = RecOetf::get_u8_to_f64_lut();
+            let encode_lut = RecOetf::get_f32_to_u8_lut();
+
+            let linear: rgb::LinRec2020<f32> =
+                decode_lut.lookup_rgb(rgb::Rec2020::new(23, 198, 76));
+            let _: rgb::Rec2020<u8> = encode_lut.lookup_rgb(linear);
+
+            let linear: rgb::LinRec709<f32> = decode_lut.lookup_rgb(rgb::Rec709::new(23, 198, 76));
+            let _: rgb::Rec709<u8> = encode_lut.lookup_rgb(linear);
+
+            let _: rgb::LinRec2020<f64> = decode_lut_64.lookup_rgb(rgb::Rec2020::new(23, 198, 76));
+            let _: rgb::LinRec709<f64> = decode_lut_64.lookup_rgb(rgb::Rec709::new(23, 198, 76));
         }
     }
 }

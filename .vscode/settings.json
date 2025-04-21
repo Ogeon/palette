@@ -1,10 +1,5 @@
 {
-    "rust-analyzer.cargo.features": [
-        "random",
-        "serializing",
-        "bytemuck",
-        "wide"
-    ],
+    "rust-analyzer.cargo.features": "all",
     "rust-analyzer.imports.granularity.enforce": true,
     "rust-analyzer.imports.granularity.group": "crate",
     "rust-analyzer.imports.group.enable": true,

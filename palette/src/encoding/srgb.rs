@@ -1,17 +1,21 @@
 //! The sRGB standard.
 
+use palette_math::{
+    gamma::lut::GammaLutBuilder,
+    lut::{ArrayTable, SliceTable},
+};
+
 use crate::{
     bool_mask::LazySelect,
-    encoding::{
-        lut::{self, srgb::*},
-        FromLinear, IntoLinear,
-    },
+    encoding::{lut::srgb::*, FromLinear, IntoLinear},
     luma::LumaStandard,
     num::{Arithmetics, MulAdd, MulSub, PartialCmp, Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
     white_point::{Any, D65},
     Mat3, Yxy,
 };
+
+use super::{FromLinearLut, GetLutBuilder, IntoLinearLut};
 
 /// The sRGB standard, color space, and transfer function.
 ///
@@ -30,6 +34,23 @@ use crate::{
 ///   result of less than 0.6 in line with [this DirectX spec](<https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#FLOATtoSRGB>).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Srgb;
+
+impl Srgb {
+    /// Access the pre-generated lookup table for non-linear `u8` to linear `f32` conversion.
+    pub fn get_u8_to_f32_lut() -> IntoLinearLut<u8, f32, Self, &'static ArrayTable<256>> {
+        IntoLinearLut::from(SRGB_U8_TO_F32.get_ref())
+    }
+
+    /// Access the pre-generated lookup table for non-linear `u8` to linear `f64` conversion.
+    pub fn get_u8_to_f64_lut() -> IntoLinearLut<u8, f64, Self, &'static ArrayTable<256>> {
+        IntoLinearLut::from(SRGB_U8_TO_F64.get_ref())
+    }
+
+    /// Access the pre-generated lookup table for linear `f32` to non-linear `u8` conversion.
+    pub fn get_f32_to_u8_lut() -> FromLinearLut<f32, u8, Self, &'static SliceTable> {
+        FromLinearLut::from_table(SRGB_F32_TO_U8.get_slice())
+    }
+}
 
 impl<T: Real> Primaries<T> for Srgb {
     fn red() -> Yxy<Any, T> {
@@ -92,6 +113,12 @@ impl LumaStandard for Srgb {
     type TransferFn = Srgb;
 }
 
+impl GetLutBuilder for Srgb {
+    fn get_lut_builder() -> GammaLutBuilder {
+        palette_math::gamma::adobe_rgb_builder()
+    }
+}
+
 impl<T> IntoLinear<T, T> for Srgb
 where
     T: Real + Powf + MulAdd + Arithmetics + PartialCmp + Clone,
@@ -124,21 +151,21 @@ where
 impl IntoLinear<f32, u8> for Srgb {
     #[inline]
     fn into_linear(encoded: u8) -> f32 {
-        SRGB_U8_TO_F32[encoded as usize]
+        *SRGB_U8_TO_F32.lookup(encoded)
     }
 }
 
 impl FromLinear<f32, u8> for Srgb {
     #[inline]
     fn from_linear(linear: f32) -> u8 {
-        lut::linear_f32_to_encoded_u8(linear, SRGB_MIN_FLOAT, &TO_SRGB_U8)
+        SRGB_F32_TO_U8.lookup(linear)
     }
 }
 
 impl IntoLinear<f64, u8> for Srgb {
     #[inline]
     fn into_linear(encoded: u8) -> f64 {
-        SRGB_U8_TO_F64[encoded as usize]
+        *SRGB_U8_TO_F64.lookup(encoded)
     }
 }
 
@@ -198,9 +225,13 @@ mod test {
     }
 
     mod lut {
-        use crate::encoding::{FromLinear, IntoLinear, Srgb};
+        use crate::{
+            encoding::{FromLinear, IntoLinear, Srgb},
+            rgb,
+        };
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         #[cfg(feature = "approx")]
         fn test_u8_f32_into_impl() {
             for i in 0..=255u8 {
@@ -211,6 +242,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         #[cfg(feature = "approx")]
         fn test_u8_f64_into_impl() {
             for i in 0..=255u8 {
@@ -221,6 +253,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u8_to_f32_to_u8() {
             for expected in 0..=255u8 {
                 let linear: f32 = Srgb::into_linear(expected);
@@ -230,12 +263,31 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u8_to_f64_to_u8() {
             for expected in 0..=255u8 {
                 let linear: f64 = Srgb::into_linear(expected);
                 let result: u8 = Srgb::from_linear(linear);
                 assert_eq!(result, expected);
             }
+        }
+
+        #[test]
+        fn constant_lut() {
+            let decode_lut = Srgb::get_u8_to_f32_lut();
+            let decode_lut_64 = Srgb::get_u8_to_f64_lut();
+            let encode_lut = Srgb::get_f32_to_u8_lut();
+
+            let linear: rgb::LinSrgb<f32> = decode_lut.lookup_rgb(rgb::Srgb::new(23, 198, 76));
+            let _: rgb::Srgb<u8> = encode_lut.lookup_rgb(linear);
+
+            let linear: rgb::LinDisplayP3<f32> =
+                decode_lut.lookup_rgb(rgb::DisplayP3::new(23, 198, 76));
+            let _: rgb::DisplayP3<u8> = encode_lut.lookup_rgb(linear);
+
+            let _: rgb::LinSrgb<f64> = decode_lut_64.lookup_rgb(rgb::Srgb::new(23, 198, 76));
+            let _: rgb::LinDisplayP3<f64> =
+                decode_lut_64.lookup_rgb(rgb::DisplayP3::new(23, 198, 76));
         }
     }
 }

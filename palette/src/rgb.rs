@@ -270,13 +270,22 @@ pub type LinProPhotoRgb<T = f32> = Rgb<Linear<encoding::ProPhotoRgb>, T>;
 /// create a value and use it.
 pub type LinProPhotoRgba<T = f32> = Rgba<Linear<encoding::ProPhotoRgb>, T>;
 
-/// Rec. 709.
+/// Non-linear Rec. 709.
 ///
 /// This standard has the same primaries as [`Srgb`], but uses the transfer
 /// function detailed in ITU-R Recommendation BT.709.
 ///
 /// See [`Rgb`] for more details on how to create a value and use it.
 pub type Rec709<T = f32> = Rgb<encoding::Rec709, T>;
+
+/// Linear Rec. 709.
+///
+/// You probably want [`Rec709`] if you are looking for an input or output
+/// format. This is the linear version of Rec. 709, which is what you would
+/// usually convert to before working with the color.
+///
+/// See [`Rgb`] for more details on how to create a value and use it.
+pub type LinRec709<T = f32> = Rgb<Linear<encoding::Rec709>, T>;
 
 /// Non-linear Rec. 2020, a wide color gamut RGB format.
 ///

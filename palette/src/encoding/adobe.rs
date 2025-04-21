@@ -1,16 +1,20 @@
 //! The Adobe RGB (1998) standard.
 
+use palette_math::{
+    gamma::lut::GammaLutBuilder,
+    lut::{ArrayTable, SliceTable},
+};
+
 use crate::{
-    encoding::{
-        lut::{self, adobe::*},
-        FromLinear, IntoLinear,
-    },
+    encoding::{lut::adobe::*, FromLinear, IntoLinear},
     luma::LumaStandard,
     num::{Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
     white_point::{Any, D65},
     Mat3, Yxy,
 };
+
+use super::{FromLinearLut, GetLutBuilder, IntoLinearLut};
 
 /// The Adobe RGB (1998) (a.k.a. opRGB) color space and standard.
 ///
@@ -35,6 +39,23 @@ use crate::{
 ///   result of less than 0.6 in line with [this DirectX spec](<https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm#FLOATtoSRGB>).
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct AdobeRgb;
+
+impl AdobeRgb {
+    /// Access the pre-generated lookup table for non-linear `u8` to linear `f32` conversion.
+    pub fn get_u8_to_f32_lut() -> IntoLinearLut<u8, f32, Self, &'static ArrayTable<256>> {
+        IntoLinearLut::from(ADOBE_RGB_U8_TO_F32.get_ref())
+    }
+
+    /// Access the pre-generated lookup table for non-linear `u8` to linear `f64` conversion.
+    pub fn get_u8_to_f64_lut() -> IntoLinearLut<u8, f64, Self, &'static ArrayTable<256>> {
+        IntoLinearLut::from(ADOBE_RGB_U8_TO_F64.get_ref())
+    }
+
+    /// Access the pre-generated lookup table for linear `f32` to non-linear `u8` conversion.
+    pub fn get_f32_to_u8_lut() -> FromLinearLut<f32, u8, Self, &'static SliceTable> {
+        FromLinearLut::from_table(ADOBE_RGB_F32_TO_U8.get_slice())
+    }
+}
 
 impl<T: Real> Primaries<T> for AdobeRgb {
     // Primary values from https://www.adobe.com/digitalimag/pdfs/AdobeRGB1998.pdf with
@@ -99,6 +120,12 @@ impl LumaStandard for AdobeRgb {
     type TransferFn = AdobeRgb;
 }
 
+impl GetLutBuilder for AdobeRgb {
+    fn get_lut_builder() -> GammaLutBuilder {
+        palette_math::gamma::adobe_rgb_builder()
+    }
+}
+
 impl<T> IntoLinear<T, T> for AdobeRgb
 where
     T: Real + Powf,
@@ -120,21 +147,21 @@ where
 impl IntoLinear<f32, u8> for AdobeRgb {
     #[inline]
     fn into_linear(encoded: u8) -> f32 {
-        ADOBE_RGB_U8_TO_F32[encoded as usize]
+        *ADOBE_RGB_U8_TO_F32.lookup(encoded)
     }
 }
 
 impl FromLinear<f32, u8> for AdobeRgb {
     #[inline]
     fn from_linear(linear: f32) -> u8 {
-        lut::linear_f32_to_encoded_u8(linear, ADOBE_RGB_MIN_FLOAT, &TO_ADOBE_RGB_U8)
+        ADOBE_RGB_F32_TO_U8.lookup(linear)
     }
 }
 
 impl IntoLinear<f64, u8> for AdobeRgb {
     #[inline]
     fn into_linear(encoded: u8) -> f64 {
-        ADOBE_RGB_U8_TO_F64[encoded as usize]
+        *ADOBE_RGB_U8_TO_F64.lookup(encoded)
     }
 }
 
@@ -202,9 +229,13 @@ mod test {
     }
 
     mod lut {
-        use crate::encoding::{AdobeRgb, FromLinear, IntoLinear};
+        use crate::{
+            encoding::{AdobeRgb, FromLinear, IntoLinear},
+            rgb,
+        };
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         #[cfg(feature = "approx")]
         fn test_u8_f32_into_impl() {
             for i in 0..=255u8 {
@@ -215,6 +246,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         #[cfg(feature = "approx")]
         fn test_u8_f64_into_impl() {
             for i in 0..=255u8 {
@@ -225,6 +257,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u8_to_f32_to_u8() {
             for expected in 0u8..=255u8 {
                 let linear: f32 = AdobeRgb::into_linear(expected);
@@ -234,12 +267,27 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u8_to_f64_to_u8() {
             for expected in 0u8..=255u8 {
                 let linear: f64 = AdobeRgb::into_linear(expected);
                 let result: u8 = AdobeRgb::from_linear(linear);
                 assert_eq!(result, expected);
             }
+        }
+
+        #[test]
+        fn constant_lut() {
+            let decode_lut = AdobeRgb::get_u8_to_f32_lut();
+            let decode_lut_64 = AdobeRgb::get_u8_to_f64_lut();
+            let encode_lut = AdobeRgb::get_f32_to_u8_lut();
+
+            let linear: rgb::LinAdobeRgb<f32> =
+                decode_lut.lookup_rgb(rgb::AdobeRgb::new(23, 198, 76));
+            let _: rgb::AdobeRgb<u8> = encode_lut.lookup_rgb(linear);
+
+            let _: rgb::LinAdobeRgb<f64> =
+                decode_lut_64.lookup_rgb(rgb::AdobeRgb::new(23, 198, 76));
         }
     }
 }
