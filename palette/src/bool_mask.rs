@@ -8,6 +8,9 @@ use core::ops::{BitAnd, BitOr, BitXor, Not};
 #[cfg(feature = "wide")]
 mod wide;
 
+#[cfg(all(feature = "simba", feature = "wide"))]
+mod simba_wide;
+
 /// Associates a Boolean type to the implementing type.
 ///
 /// This is primarily used in traits and functions that can accept SIMD values
