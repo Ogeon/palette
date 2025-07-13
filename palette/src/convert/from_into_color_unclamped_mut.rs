@@ -108,7 +108,7 @@ where
     /// This reuses the memory space, and the returned scope guard will restore
     /// the converted colors to their original type when it's dropped.
     #[must_use]
-    fn from_color_unclamped_mut(color: &mut T) -> FromColorUnclampedMutGuard<Self, T>;
+    fn from_color_unclamped_mut(color: &mut T) -> FromColorUnclampedMutGuard<'_, Self, T>;
 }
 
 impl<T, U> FromColorUnclampedMut<U> for T
@@ -117,7 +117,7 @@ where
     U: FromColorUnclamped<T> + ArrayCast<Array = T::Array> + Clone,
 {
     #[inline]
-    fn from_color_unclamped_mut(color: &mut U) -> FromColorUnclampedMutGuard<Self, U> {
+    fn from_color_unclamped_mut(color: &mut U) -> FromColorUnclampedMutGuard<'_, Self, U> {
         let color_clone = color.clone();
 
         let result: &mut Self = cast::from_array_mut(cast::into_array_mut(color));
@@ -137,7 +137,7 @@ where
     U: FromColorUnclampedMut<T> + ArrayCast<Array = T::Array>,
 {
     #[inline]
-    fn from_color_unclamped_mut(colors: &mut [U]) -> FromColorUnclampedMutGuard<Self, [U]> {
+    fn from_color_unclamped_mut(colors: &mut [U]) -> FromColorUnclampedMutGuard<'_, Self, [U]> {
         for color in &mut *colors {
             // Forgetting the guard leaves the colors in the converted state.
             core::mem::forget(T::from_color_unclamped_mut(color));
@@ -203,7 +203,7 @@ where
     /// the converted colors to their original type when it's dropped.
     #[allow(clippy::wrong_self_convention)]
     #[must_use]
-    fn into_color_unclamped_mut(&mut self) -> FromColorUnclampedMutGuard<T, Self>;
+    fn into_color_unclamped_mut(&mut self) -> FromColorUnclampedMutGuard<'_, T, Self>;
 }
 
 impl<T, U> IntoColorUnclampedMut<T> for U
@@ -212,7 +212,7 @@ where
     U: FromColorUnclampedMut<T> + ?Sized,
 {
     #[inline]
-    fn into_color_unclamped_mut(&mut self) -> FromColorUnclampedMutGuard<T, Self> {
+    fn into_color_unclamped_mut(&mut self) -> FromColorUnclampedMutGuard<'_, T, Self> {
         T::from_color_unclamped_mut(self)
     }
 }

@@ -1121,7 +1121,7 @@ macro_rules! impl_struct_of_arrays_methods {
 
             /// Return an iterator that moves colors out of the specified range.
             #[inline(always)]
-            pub fn drain<R>(&mut self, range: R) -> Iter<alloc::vec::Drain<T> $(, $phantom_ty)?>
+            pub fn drain<R>(&mut self, range: R) -> Iter<alloc::vec::Drain<'_, T> $(, $phantom_ty)?>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {
@@ -1219,7 +1219,7 @@ macro_rules! impl_struct_of_arrays_methods {
 
             /// Return an iterator that moves colors out of the specified range.
             #[inline(always)]
-            pub fn drain<R>(&mut self, range: R) -> crate::alpha::Iter<Iter<alloc::vec::Drain<T> $(, $phantom_ty)?>, alloc::vec::Drain<A>>
+            pub fn drain<R>(&mut self, range: R) -> crate::alpha::Iter<Iter<alloc::vec::Drain<'_, T> $(, $phantom_ty)?>, alloc::vec::Drain<'_, A>>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {
@@ -1327,7 +1327,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
 
             /// Return an iterator that moves colors out of the specified range.
             #[inline(always)]
-            pub fn drain<R>(&mut self, range: R) -> Iter<alloc::vec::Drain<T> $(, $phantom_ty)?>
+            pub fn drain<R>(&mut self, range: R) -> Iter<alloc::vec::Drain<'_, T> $(, $phantom_ty)?>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {
@@ -1426,7 +1426,7 @@ macro_rules! impl_struct_of_arrays_methods_hue {
 
             /// Return an iterator that moves colors out of the specified range.
             #[inline(always)]
-            pub fn drain<R>(&mut self, range: R) -> crate::alpha::Iter<Iter<alloc::vec::Drain<T> $(, $phantom_ty)?>, alloc::vec::Drain<A>>
+            pub fn drain<R>(&mut self, range: R) -> crate::alpha::Iter<Iter<alloc::vec::Drain<'_, T> $(, $phantom_ty)?>, alloc::vec::Drain<'_, A>>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {

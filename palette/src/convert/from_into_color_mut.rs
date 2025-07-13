@@ -107,7 +107,7 @@ where
     /// This reuses the memory space, and the returned scope guard will restore
     /// the converted colors to their original type when it's dropped.
     #[must_use]
-    fn from_color_mut(color: &mut T) -> FromColorMutGuard<Self, T>;
+    fn from_color_mut(color: &mut T) -> FromColorMutGuard<'_, Self, T>;
 }
 
 impl<T, U> FromColorMut<U> for T
@@ -116,7 +116,7 @@ where
     U: FromColor<T> + ArrayCast<Array = T::Array> + Clone,
 {
     #[inline]
-    fn from_color_mut(color: &mut U) -> FromColorMutGuard<Self, U> {
+    fn from_color_mut(color: &mut U) -> FromColorMutGuard<'_, Self, U> {
         let color_clone = color.clone();
 
         let result: &mut T = cast::from_array_mut(cast::into_array_mut(color));
@@ -136,7 +136,7 @@ where
     U: FromColorMut<T> + ArrayCast<Array = T::Array>,
 {
     #[inline]
-    fn from_color_mut(colors: &mut [U]) -> FromColorMutGuard<Self, [U]> {
+    fn from_color_mut(colors: &mut [U]) -> FromColorMutGuard<'_, Self, [U]> {
         for color in &mut *colors {
             // Forgetting the guard leaves the colors in the converted state.
             core::mem::forget(T::from_color_mut(color));
@@ -202,7 +202,7 @@ where
     /// the converted colors to their original type when it's dropped.
     #[allow(clippy::wrong_self_convention)]
     #[must_use]
-    fn into_color_mut(&mut self) -> FromColorMutGuard<T, Self>;
+    fn into_color_mut(&mut self) -> FromColorMutGuard<'_, T, Self>;
 }
 
 impl<T, U> IntoColorMut<T> for U
@@ -211,7 +211,7 @@ where
     U: FromColorMut<T> + ?Sized,
 {
     #[inline]
-    fn into_color_mut(&mut self) -> FromColorMutGuard<T, Self> {
+    fn into_color_mut(&mut self) -> FromColorMutGuard<'_, T, Self> {
         T::from_color_mut(self)
     }
 }

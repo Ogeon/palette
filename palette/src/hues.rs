@@ -269,7 +269,7 @@ macro_rules! make_hues {
             }
 
             /// Return an iterator that moves hues out of the specified range.
-            pub fn drain<R>(&mut self, range: R) -> $iter_name<alloc::vec::Drain<T>>
+            pub fn drain<R>(&mut self, range: R) -> $iter_name<alloc::vec::Drain<'_, T>>
             where
                 R: core::ops::RangeBounds<usize> + Clone,
             {
