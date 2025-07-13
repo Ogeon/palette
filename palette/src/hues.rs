@@ -10,9 +10,9 @@ use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 
 #[cfg(feature = "random")]
 use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
+    distr::{
+        uniform::{Error as UniformError, SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, StandardUniform,
     },
     Rng,
 };
@@ -760,14 +760,14 @@ macro_rules! make_hues {
         }
 
         #[cfg(feature = "random")]
-        impl<T> Distribution<$name<T>> for Standard
+        impl<T> Distribution<$name<T>> for StandardUniform
         where
             T: RealAngle + FullRotation + Mul<Output = T>,
-            Standard: Distribution<T>,
+            StandardUniform: Distribution<T>,
         {
             #[inline(always)]
             fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $name<T> {
-                $name::from_degrees(rng.gen() * T::full_rotation())
+                $name::from_degrees(rng.random() * T::full_rotation())
             }
         }
 
@@ -846,7 +846,7 @@ macro_rules! impl_uniform {
         {
             type X = $base_ty<T>;
 
-            fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, UniformError>
             where
                 B1: SampleBorrow<Self::X> + Sized,
                 B2: SampleBorrow<Self::X> + Sized,
@@ -862,12 +862,12 @@ macro_rules! impl_uniform {
                     normalized_high
                 };
 
-                $uni_ty {
-                    hue: Uniform::new(normalized_low, normalized_high),
-                }
+                Ok($uni_ty {
+                    hue: Uniform::new(normalized_low, normalized_high)?,
+                })
             }
 
-            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, UniformError>
             where
                 B1: SampleBorrow<Self::X> + Sized,
                 B2: SampleBorrow<Self::X> + Sized,
@@ -883,9 +883,9 @@ macro_rules! impl_uniform {
                     normalized_high
                 };
 
-                $uni_ty {
-                    hue: Uniform::new_inclusive(normalized_low, normalized_high),
-                }
+                Ok($uni_ty {
+                    hue: Uniform::new_inclusive(normalized_low, normalized_high)?,
+                })
             }
 
             fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $base_ty<T> {

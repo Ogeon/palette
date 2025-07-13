@@ -10,9 +10,9 @@ use core::{
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
 #[cfg(feature = "random")]
 use rand::{
-    distributions::{
-        uniform::{SampleBorrow, SampleUniform, Uniform, UniformSampler},
-        Distribution, Standard,
+    distr::{
+        uniform::{Error as UniformError, SampleBorrow, SampleUniform, Uniform, UniformSampler},
+        Distribution, StandardUniform,
     },
     Rng,
 };
@@ -988,14 +988,14 @@ where
 }
 
 #[cfg(feature = "random")]
-impl<C, T> Distribution<Alpha<C, T>> for Standard
+impl<C, T> Distribution<Alpha<C, T>> for StandardUniform
 where
-    Standard: Distribution<C> + Distribution<T>,
+    StandardUniform: Distribution<C> + Distribution<T>,
 {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Alpha<C, T> {
         Alpha {
-            color: rng.gen(),
-            alpha: rng.gen(),
+            color: rng.random(),
+            alpha: rng.random(),
         }
     }
 }
@@ -1028,7 +1028,7 @@ where
 {
     type X = Alpha<C, T>;
 
-    fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+    fn new<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, UniformError>
     where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
@@ -1036,13 +1036,13 @@ where
         let low = low_b.borrow().clone();
         let high = high_b.borrow().clone();
 
-        UniformAlpha {
-            color: Uniform::new::<C, _>(low.color, high.color),
-            alpha: Uniform::new::<_, T>(low.alpha, high.alpha),
-        }
+        Ok(UniformAlpha {
+            color: Uniform::new::<C, _>(low.color, high.color)?,
+            alpha: Uniform::new::<_, T>(low.alpha, high.alpha)?,
+        })
     }
 
-    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+    fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, UniformError>
     where
         B1: SampleBorrow<Self::X> + Sized,
         B2: SampleBorrow<Self::X> + Sized,
@@ -1050,10 +1050,10 @@ where
         let low = low_b.borrow().clone();
         let high = high_b.borrow().clone();
 
-        UniformAlpha {
-            color: Uniform::new_inclusive::<C, _>(low.color, high.color),
-            alpha: Uniform::new_inclusive::<_, T>(low.alpha, high.alpha),
-        }
+        Ok(UniformAlpha {
+            color: Uniform::new_inclusive::<C, _>(low.color, high.color)?,
+            alpha: Uniform::new_inclusive::<_, T>(low.alpha, high.alpha)?,
+        })
     }
 
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Alpha<C, T> {

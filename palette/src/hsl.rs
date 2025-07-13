@@ -675,9 +675,9 @@ mod test {
 
         for _ in 0..SAMPLES {
             let color = Hsl::<crate::encoding::Srgb, f32>::new(
-                rng.gen::<f32>() * 360.0,
-                rng.gen(),
-                rng.gen(),
+                rng.random::<f32>() * 360.0,
+                rng.random(),
+                rng.random(),
             );
             let color: crate::rgb::Rgb = crate::IntoColor::into_color(color);
             red[((color.red * BINS as f32) as usize).min(9)] += 1;

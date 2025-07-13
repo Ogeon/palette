@@ -52,7 +52,7 @@ optional = true
 default-features = false
 
 [dependencies.rand]
-version = "0.8.0"
+version = "0.9.0"
 default-features = false
 optional = true
 
@@ -81,7 +81,7 @@ default-features = false
 features = ["png"]
 
 [dev-dependencies.rand_mt]
-version = "4.0.0"
+version = "5.0.0"
 default-features = false
 features = ["rand-traits"]
 
