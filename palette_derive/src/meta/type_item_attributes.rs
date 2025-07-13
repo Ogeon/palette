@@ -46,7 +46,7 @@ impl AttributeArgumentParser for TypeItemAttributes {
                         } else {
                             errors.push(syn::Error::new(
                                 skipped_color.span(),
-                                format!("`{}` is not a valid color type", skipped_color),
+                                format!("`{skipped_color}` is not a valid color type"),
                             ));
                             continue;
                         };
