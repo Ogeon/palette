@@ -53,7 +53,7 @@ impl AttributeArgumentParser for TypeItemAttributes {
 
                         let infer_group = group
                             .find_type_by_name(&color_name)
-                            .map_or(true, |ty| ty.infer_group);
+                            .is_none_or(|ty| ty.infer_group);
 
                         if infer_group {
                             self.color_groups.insert(group.into());
