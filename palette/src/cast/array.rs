@@ -743,7 +743,7 @@ where
         core::mem::align_of::<T>()
     );
 
-    if values.len() % T::Array::LENGTH != 0 {
+    if !values.len().is_multiple_of(T::Array::LENGTH) {
         return Err(SliceCastError);
     }
 
@@ -921,7 +921,7 @@ where
         core::mem::align_of::<T>()
     );
 
-    if values.len() % T::Array::LENGTH != 0 {
+    if !values.len().is_multiple_of(T::Array::LENGTH) {
         return Err(SliceCastError);
     }
 
@@ -1167,7 +1167,7 @@ pub fn try_from_component_slice_box<T>(
 where
     T: ArrayCast,
 {
-    if values.len() % T::Array::LENGTH != 0 {
+    if !values.len().is_multiple_of(T::Array::LENGTH) {
         return Err(BoxedSliceCastError { values });
     }
 
@@ -1387,14 +1387,14 @@ where
         core::mem::align_of::<T>()
     );
 
-    if values.len() % T::Array::LENGTH != 0 {
+    if !values.len().is_multiple_of(T::Array::LENGTH) {
         return Err(VecCastError {
             values,
             kind: VecCastErrorKind::LengthMismatch,
         });
     }
 
-    if values.capacity() % T::Array::LENGTH != 0 {
+    if !values.capacity().is_multiple_of(T::Array::LENGTH) {
         return Err(VecCastError {
             values,
             kind: VecCastErrorKind::CapacityMismatch,
