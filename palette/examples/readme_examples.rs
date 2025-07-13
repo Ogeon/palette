@@ -46,8 +46,8 @@ fn pixels_and_buffers() {
     swap_red_and_blue(&mut image);
     let filename = "example-data/output/readme_pixels_and_buffers.png";
     match image.save(filename) {
-        Ok(()) => println!("see '{}' for the result", filename),
-        Err(e) => println!("could not write '{}': {}", filename, e),
+        Ok(()) => println!("see '{filename}' for the result"),
+        Err(e) => println!("could not write '{filename}': {e}"),
     }
 }
 
@@ -126,8 +126,8 @@ fn color_operations_2() {
     alpha_blend_images(&mut image1, &image2);
     let filename = "example-data/output/readme_color_operations_2.png";
     match image1.save(filename) {
-        Ok(()) => println!("see '{}' for the result", filename),
-        Err(e) => println!("could not write '{}': {}", filename, e),
+        Ok(()) => println!("see '{filename}' for the result"),
+        Err(e) => println!("could not write '{filename}': {e}"),
     }
 }
 
@@ -191,8 +191,8 @@ fn display_colors(filename: &str, displays: &[DisplayType]) {
 
     let _ = std::fs::create_dir("example-data/output");
     match image.save(filename) {
-        Ok(()) => println!("see '{}' for the result", filename),
-        Err(e) => println!("could not write '{}': {}", filename, e),
+        Ok(()) => println!("see '{filename}' for the result"),
+        Err(e) => println!("could not write '{filename}': {e}"),
     }
 }
 

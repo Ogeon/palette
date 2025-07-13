@@ -68,7 +68,7 @@ fn main() {
     let _ = std::fs::create_dir("example-data/output");
     match image.save("example-data/output/blend.png") {
         Ok(()) => println!("see 'example-data/output/blend.png' for the result"),
-        Err(e) => println!("failed to write 'example-data/output/blend.png': {}", e),
+        Err(e) => println!("failed to write 'example-data/output/blend.png': {e}"),
     }
 }
 

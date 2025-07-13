@@ -313,22 +313,18 @@ mod tests {
                 let rgb: Srgb<u8> = Srgb::<f64>::from_color_unclamped(color).into_format();
                 println!(
                     "\n\
-                    roundtrip of {} (#{:x} / {:?})\n\
-                    =================================================",
-                    name, rgb, color
+                    roundtrip of {name} (#{rgb:x} / {color:?})\n\
+                    ================================================="
                 );
 
                 println!("Color is white: {}", color.is_white(EPSILON));
 
                 let okhsl = Okhsl::from_color_unclamped(color);
-                println!("Okhsl: {:?}", okhsl);
+                println!("Okhsl: {okhsl:?}");
                 let roundtrip_color = Oklab::from_color_unclamped(okhsl);
                 assert!(
                     Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                    "'{}' failed.\n{:?}\n!=\n{:?}",
-                    name,
-                    roundtrip_color,
-                    color
+                    "'{name}' failed.\n{roundtrip_color:?}\n!=\n{color:?}"
                 );
             }
         }
@@ -372,10 +368,9 @@ mod tests {
             let lin_rgb = LinSrgb::<f64>::from_color_unclamped(rgb);
             let oklab = Oklab::from_color_unclamped(lin_rgb);
             println!(
-                "RGB: {:?}\n\
-            LinRgb: {:?}\n\
-            Oklab: {:?}",
-                rgb, lin_rgb, oklab
+                "RGB: {rgb:?}\n\
+            LinRgb: {lin_rgb:?}\n\
+            Oklab: {oklab:?}"
             );
             let okhsl = Okhsl::from_color_unclamped(oklab);
 
@@ -396,7 +391,7 @@ mod tests {
         let okhsl = Okhsl::new(0.0_f32, 0.5, 0.5);
         let rgb = Srgb::from_color_unclamped(okhsl);
         let rgb8: Rgb<encoding::Srgb, u8> = rgb.into_format();
-        let hex_str = format!("{:x}", rgb8);
+        let hex_str = format!("{rgb8:x}");
         assert_eq!(hex_str, "aa5a74");
     }
 

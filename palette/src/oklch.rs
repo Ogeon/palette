@@ -210,22 +210,18 @@ mod test {
                 let rgb: Srgb<u8> = Srgb::<f64>::from_color_unclamped(color).into_format();
                 println!(
                     "\n\
-                    roundtrip of {} (#{:x} / {:?})\n\
-                    =================================================",
-                    name, rgb, color
+                    roundtrip of {name} (#{rgb:x} / {color:?})\n\
+                    ================================================="
                 );
 
                 println!("Color is white: {}", color.is_white(EPSILON));
 
                 let oklch = Oklch::from_color_unclamped(color);
-                println!("Oklch: {:?}", oklch);
+                println!("Oklch: {oklch:?}");
                 let roundtrip_color = Oklab::from_color_unclamped(oklch);
                 assert!(
                     Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                    "'{}' failed.\n{:?}\n!=\n{:?}",
-                    name,
-                    roundtrip_color,
-                    color
+                    "'{name}' failed.\n{roundtrip_color:?}\n!=\n{color:?}"
                 );
             }
         }

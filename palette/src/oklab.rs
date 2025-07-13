@@ -599,7 +599,7 @@ mod test {
         #[test]
         fn blue() {
             let a = Oklab::from_color(LinSrgb::new(0.0, 0.0, 1.0));
-            println!("Oklab blue: {:?}", a);
+            println!("Oklab blue: {a:?}");
             // from https://github.com/bottosson/bottosson.github.io/blob/master/misc/ok_color.h
             let b = Oklab::new(0.4520137183853429, -0.0324569841687640, -0.3115281476783751);
             assert!(Oklab::visually_eq(a, b, 1e-8));

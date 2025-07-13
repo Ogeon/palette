@@ -584,8 +584,8 @@ mod tests {
             "Max chroma {} at hue {:?}° (Oklab a and b {}, {}).",
             max_chroma.lc.chroma, max_chroma.hue, max_chroma_a, max_chroma_b
         );
-        println!("{} <= a <= {}", min_a, max_a);
-        println!("{} <= b <= {}", min_b, max_b);
+        println!("{min_a} <= a <= {max_a}");
+        println!("{min_b} <= b <= {max_b}");
     }
 
     #[test]
