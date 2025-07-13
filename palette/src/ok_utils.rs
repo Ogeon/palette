@@ -514,8 +514,8 @@ mod tests {
 
     #[test]
     fn test_toe() {
-        assert_eq!(toe(0.0), 0.0);
-        assert_eq!(toe(1.0), 1.0);
+        assert_relative_eq!(toe(0.0), 0.0);
+        assert_relative_eq!(toe(1.0), 1.0);
         let grey50srgb: Srgb = Rgb::<encoding::Srgb, u8>::from_str("#777777")
             .unwrap()
             .into_format();

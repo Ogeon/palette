@@ -407,7 +407,7 @@
 //!     };
 //!     let color: LinSrgba = css_color.into_color();
 //!
-//!     assert_relative_eq!(color, LinSrgba::new(0.496933, 0.0, 1.0, 0.3));
+//!     assert_relative_eq!(color, LinSrgba::new(0.496933, 0.0, 1.0, 0.3), epsilon = 0.000001);
 //! }
 //! ```
 

@@ -658,6 +658,7 @@ mod test {
     /// Sanity check to make sure the test doesn't start accepting known
     /// non-uniform distributions.
     #[cfg(feature = "random")]
+    #[cfg_attr(miri, ignore)]
     #[test]
     #[should_panic(expected = "is not uniform enough")]
     fn uniform_distribution_fail() {

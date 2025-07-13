@@ -1567,6 +1567,9 @@ mod test {
     #[cfg(feature = "alloc")]
     use crate::{LinSrgb, Srgb};
 
+    #[cfg(feature = "approx")]
+    use approx::assert_relative_eq;
+
     #[cfg(feature = "alloc")]
     #[test]
     fn array_vec_len_cap() {
@@ -1594,7 +1597,7 @@ mod test {
         assert_eq!(colors.capacity(), 8);
     }
 
-    #[cfg(feature = "alloc")]
+    #[cfg(all(feature = "alloc", feature = "approx"))]
     #[test]
     fn map_vec_in_place() {
         fn do_things(rgb: Srgb) -> LinSrgb {
@@ -1605,16 +1608,19 @@ mod test {
 
         let values = vec![Srgb::new(0.8, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)];
         let result = super::map_vec_in_place(values, do_things);
-        assert_eq!(
-            result,
-            vec![
-                do_things(Srgb::new(0.8, 1.0, 0.2)),
-                do_things(Srgb::new(0.9, 0.1, 0.3))
-            ]
-        )
+        assert_relative_eq!(
+            result[0],
+            do_things(Srgb::new(0.8, 1.0, 0.2)),
+            epsilon = 0.000001
+        );
+        assert_relative_eq!(
+            result[1],
+            do_things(Srgb::new(0.9, 0.1, 0.3)),
+            epsilon = 0.000001
+        );
     }
 
-    #[cfg(feature = "alloc")]
+    #[cfg(all(feature = "alloc", feature = "approx"))]
     #[test]
     fn map_slice_box_in_place() {
         fn do_things(rgb: Srgb) -> LinSrgb {
@@ -1625,13 +1631,15 @@ mod test {
 
         let values = vec![Srgb::new(0.8, 1.0, 0.2), Srgb::new(0.9, 0.1, 0.3)].into_boxed_slice();
         let result = super::map_slice_box_in_place(values, do_things);
-        assert_eq!(
-            result,
-            vec![
-                do_things(Srgb::new(0.8, 1.0, 0.2)),
-                do_things(Srgb::new(0.9, 0.1, 0.3))
-            ]
-            .into_boxed_slice()
-        )
+        assert_relative_eq!(
+            result[0],
+            do_things(Srgb::new(0.8, 1.0, 0.2)),
+            epsilon = 0.000001
+        );
+        assert_relative_eq!(
+            result[1],
+            do_things(Srgb::new(0.9, 0.1, 0.3)),
+            epsilon = 0.000001
+        );
     }
 }

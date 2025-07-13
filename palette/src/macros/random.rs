@@ -33,6 +33,7 @@ macro_rules! test_uniform_distribution {
         max: $max:expr$(,)?
     ) => {
         #[cfg(feature = "random")]
+        #[cfg_attr(miri, ignore)]
         #[test]
         fn uniform_distribution_rng_gen() {
             use rand::Rng;
@@ -65,6 +66,7 @@ macro_rules! test_uniform_distribution {
         }
 
         #[cfg(feature = "random")]
+        #[cfg_attr(miri, ignore)]
         #[test]
         fn uniform_distribution_uniform_sample() {
             use rand::distributions::uniform::Uniform;
@@ -99,6 +101,7 @@ macro_rules! test_uniform_distribution {
         }
 
         #[cfg(feature = "random")]
+        #[cfg_attr(miri, ignore)]
         #[test]
         fn uniform_distribution_uniform_sample_inclusive() {
             use rand::distributions::uniform::Uniform;

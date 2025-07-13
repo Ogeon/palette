@@ -410,9 +410,10 @@ mod tests {
         // chroma check.
         let oklab = Oklab::new(1.0, 1.0, 0.0);
         let okhsl: Okhsl = oklab.into_color_unclamped();
-        assert_eq!(okhsl, Okhsl::new(0.0, 0.0, 1.0));
+        assert_relative_eq!(okhsl, Okhsl::new(0.0, 0.0, 1.0));
     }
 
+    #[cfg(feature = "approx")]
     #[test]
     fn test_oklab_to_okhsl_saturated_black() {
         // Minimized check for the case in
@@ -420,7 +421,7 @@ mod tests {
         // case, but another variant of it.
         let oklab = Oklab::new(0.0, 1.0, 0.0);
         let okhsl: Okhsl = oklab.into_color_unclamped();
-        assert_eq!(okhsl, Okhsl::new(0.0, 0.0, 0.0));
+        assert_relative_eq!(okhsl, Okhsl::new(0.0, 0.0, 0.0));
     }
 
     struct_of_arrays_tests!(

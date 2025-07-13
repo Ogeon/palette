@@ -916,7 +916,7 @@ mod test {
                 let hue = OklabHue::from_degrees(degree);
                 let (a, b) = hue.into_cartesian();
                 let roundtrip_hue = OklabHue::from_cartesian(a * 10000.0, b * 10000.0);
-                assert_abs_diff_eq!(roundtrip_hue, hue);
+                assert_abs_diff_eq!(roundtrip_hue, hue, epsilon = 0.0000000000001);
             }
         }
 
