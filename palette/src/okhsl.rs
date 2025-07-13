@@ -242,12 +242,10 @@ unsafe impl<T> bytemuck::Pod for Okhsl<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        convert::{FromColorUnclamped, IntoColorUnclamped},
-        encoding,
-        rgb::Rgb,
-        Okhsl, Oklab, Srgb,
-    };
+    use crate::{convert::FromColorUnclamped, encoding, rgb::Rgb, Okhsl, Srgb};
+
+    #[cfg(feature = "approx")]
+    use crate::{convert::IntoColorUnclamped, Oklab};
 
     test_convert_into_from_xyz!(Okhsl);
 
@@ -402,6 +400,7 @@ mod tests {
         assert_eq!(rgb, Srgb::new(0.0, 0.0, 0.0));
     }
 
+    #[cfg(feature = "approx")]
     #[test]
     fn test_oklab_to_okhsl_saturated_white() {
         // Minimized check for the case in

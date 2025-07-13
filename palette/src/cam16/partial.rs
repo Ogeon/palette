@@ -65,6 +65,7 @@ macro_rules! make_partial_cam16 {
             #[doc = concat!("    cam16::{Cam16, Parameters, ", stringify!($name), "},")]
             /// };
             ///
+            /// # fn main() {
             #[doc = concat!("let partial = ", stringify!($name), "::new(50.0f32, 80.0, 120.0);")]
             ///
             /// // There's also `new_const`:
@@ -88,7 +89,8 @@ macro_rules! make_partial_cam16 {
             /// // It's also possible to convert from (and to) arrays and tuples:
             #[doc = concat!("let partial_from_array = ", stringify!($name), "::from([50.0f32, 80.0, 120.0]);")]
             #[doc = concat!("let partial_from_tuple = ", stringify!($name), "::from((50.0f32, 80.0, 120.0));")]
-            ///  ```
+            /// # }
+            /// ```
             #[derive(Clone, Copy, Debug, Default, ArrayCast, WithAlpha, FromColorUnclamped)]
             #[palette(
                 palette_internal,

@@ -1565,10 +1565,13 @@ pub enum VecCastErrorKind {
 #[cfg(test)]
 mod test {
     #[cfg(feature = "alloc")]
-    use crate::{LinSrgb, Srgb};
+    use crate::Srgb;
 
-    #[cfg(feature = "approx")]
+    #[cfg(all(feature = "approx", feature = "alloc"))]
     use approx::assert_relative_eq;
+
+    #[cfg(all(feature = "approx", feature = "alloc"))]
+    use crate::LinSrgb;
 
     #[cfg(feature = "alloc")]
     #[test]

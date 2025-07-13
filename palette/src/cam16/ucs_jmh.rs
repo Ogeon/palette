@@ -298,13 +298,10 @@ impl_rand_traits_cylinder!(
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        cam16::{Cam16Jmh, Cam16UcsJmh},
-        convert::FromColorUnclamped,
-    };
+    use crate::cam16::Cam16UcsJmh;
 
     #[cfg(feature = "approx")]
-    use crate::color_difference::DeltaE;
+    use crate::{cam16::Cam16Jmh, color_difference::DeltaE, convert::FromColorUnclamped};
 
     #[cfg(all(feature = "approx", feature = "alloc"))]
     use crate::{
