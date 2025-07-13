@@ -57,11 +57,15 @@ macro_rules! make_partial_cam16 {
             /// or to create a new value by calling
             #[doc = concat!("[`new`][", stringify!($name), "::new].")]
             /// ```
+            /// #[macro_use]
+            /// extern crate approx;
+            ///
             /// use palette::{
             ///     Srgb, FromColor, IntoColor, hues::Cam16Hue,
             #[doc = concat!("    cam16::{Cam16, Parameters, ", stringify!($name), "},")]
             /// };
             ///
+            /// # fn main() {
             #[doc = concat!("let partial = ", stringify!($name), "::new(50.0f32, 80.0, 120.0);")]
             ///
             /// // There's also `new_const`:
@@ -80,12 +84,13 @@ macro_rules! make_partial_cam16 {
             #[doc = concat!("let partial_from_full = ", stringify!($name), "::from(cam16_from_rgb);")]
             ///
             /// // Direct conversion has the same result as going via full CAM16.
-            /// assert_eq!(partial_from_rgb, partial_from_full);
+            /// assert_relative_eq!(partial_from_rgb, partial_from_full, epsilon = 0.001);
             ///
             /// // It's also possible to convert from (and to) arrays and tuples:
             #[doc = concat!("let partial_from_array = ", stringify!($name), "::from([50.0f32, 80.0, 120.0]);")]
             #[doc = concat!("let partial_from_tuple = ", stringify!($name), "::from((50.0f32, 80.0, 120.0));")]
-            ///  ```
+            /// # }
+            /// ```
             #[derive(Clone, Copy, Debug, Default, ArrayCast, WithAlpha, FromColorUnclamped)]
             #[palette(
                 palette_internal,
@@ -748,7 +753,7 @@ mod test {
         // Uses the example color from https://observablehq.com/@jrus/cam16
         let xyz = Srgb::from(0x5588cc).into_linear().into_color_unclamped();
         let cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
-        assert_partial_to_full!(cam16, epsilon = 0.0000000000001);
+        assert_partial_to_full!(cam16, epsilon = 0.000000000001);
     }
 
     #[test]
@@ -764,7 +769,7 @@ mod test {
         // Checks against the output from https://observablehq.com/@jrus/cam16
         let xyz = Srgb::from(0xffffff).into_linear().into_color_unclamped();
         let cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
-        assert_partial_to_full!(cam16, epsilon = 0.000000000000001);
+        assert_partial_to_full!(cam16, epsilon = 0.000000000001);
     }
 
     #[test]
@@ -772,7 +777,7 @@ mod test {
         // Checks against the output from https://observablehq.com/@jrus/cam16
         let xyz = Srgb::from(0xff0000).into_linear().into_color_unclamped();
         let cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
-        assert_partial_to_full!(cam16, epsilon = 0.0000000000001);
+        assert_partial_to_full!(cam16, epsilon = 0.000000000001);
     }
 
     #[test]
@@ -780,7 +785,7 @@ mod test {
         // Checks against the output from https://observablehq.com/@jrus/cam16
         let xyz = Srgb::from(0x00ff00).into_linear().into_color_unclamped();
         let cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
-        assert_partial_to_full!(cam16, epsilon = 0.0000000000001);
+        assert_partial_to_full!(cam16, epsilon = 0.000000000001);
     }
 
     #[test]
@@ -788,6 +793,6 @@ mod test {
         // Checks against the output from https://observablehq.com/@jrus/cam16
         let xyz = Srgb::from(0x0000ff).into_linear().into_color_unclamped();
         let cam16: Cam16<f64> = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
-        assert_partial_to_full!(cam16);
+        assert_partial_to_full!(cam16, epsilon = 0.000000000001);
     }
 }

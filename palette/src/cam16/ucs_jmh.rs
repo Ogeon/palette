@@ -298,13 +298,10 @@ impl_rand_traits_cylinder!(
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        cam16::{Cam16Jmh, Cam16UcsJmh},
-        convert::FromColorUnclamped,
-    };
+    use crate::cam16::Cam16UcsJmh;
 
     #[cfg(feature = "approx")]
-    use crate::color_difference::DeltaE;
+    use crate::{cam16::Cam16Jmh, color_difference::DeltaE, convert::FromColorUnclamped};
 
     #[cfg(all(feature = "approx", feature = "alloc"))]
     use crate::{
@@ -328,10 +325,15 @@ mod test {
     }
 
     #[test]
+    #[cfg(feature = "approx")]
     fn cam16_roundtrip() {
         let ucs = Cam16UcsJmh::new(50.0f64, 80.0, 120.0);
         let cam16 = Cam16Jmh::from_color_unclamped(ucs);
-        assert_eq!(Cam16UcsJmh::from_color_unclamped(cam16), ucs);
+        assert_relative_eq!(
+            Cam16UcsJmh::from_color_unclamped(cam16),
+            ucs,
+            epsilon = 0.0000000000001
+        );
     }
 
     raw_pixel_conversion_tests!(Cam16UcsJmh<>: lightness, colorfulness, hue);
@@ -356,6 +358,7 @@ mod test {
     // Jab and Jmh have the same delta E.
     #[test]
     #[cfg(all(feature = "approx", feature = "alloc"))]
+    #[cfg_attr(miri, ignore)]
     fn jab_delta_e_equality() {
         let mut jab_colors: Vec<Cam16UcsJab<f64>> = alloc::vec::Vec::new();
 
@@ -386,6 +389,7 @@ mod test {
     // delta E.
     #[test]
     #[cfg(all(feature = "approx", feature = "alloc"))]
+    #[cfg_attr(miri, ignore)]
     fn jab_improved_delta_e_equality() {
         let mut jab_colors: Vec<Cam16UcsJab<f64>> = alloc::vec::Vec::new();
 

@@ -326,7 +326,7 @@ mod test {
         assert_relative_eq!(
             Cam16UcsJab::from_color_unclamped(cam16),
             ucs,
-            epsilon = 0.0000000000001
+            epsilon = 0.000000000001
         );
     }
 

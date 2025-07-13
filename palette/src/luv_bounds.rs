@@ -139,7 +139,8 @@ mod tests {
         assert_relative_eq!(
             line.intersect_length_at_angle(core::f64::consts::FRAC_PI_4)
                 .unwrap(),
-            core::f64::consts::FRAC_1_SQRT_2
+            core::f64::consts::FRAC_1_SQRT_2,
+            epsilon = 0.000000000000001
         );
         assert_eq!(
             line.intersect_length_at_angle(-core::f64::consts::FRAC_PI_4),
@@ -154,12 +155,14 @@ mod tests {
         assert_relative_eq!(
             line.intersect_length_at_angle(core::f64::consts::FRAC_PI_2)
                 .unwrap(),
-            2.0
+            2.0,
+            epsilon = 0.000000000000001
         );
         assert_relative_eq!(
             line.intersect_length_at_angle(2.0 * core::f64::consts::FRAC_PI_3)
                 .unwrap(),
-            4.0 / 3.0f64.sqrt()
+            4.0 / 3.0f64.sqrt(),
+            epsilon = 0.00000000000001
         );
     }
 

@@ -348,20 +348,16 @@ mod tests {
                     crate::Srgb::<f64>::from_color_unclamped(color).into_format();
                 println!(
                     "\n\
-                    roundtrip of {} (#{:x} / {:?})\n\
-                    =================================================",
-                    name, rgb, color
+                    roundtrip of {name} (#{rgb:x} / {color:?})\n\
+                    ================================================="
                 );
 
                 let okhsv = Okhsv::from_color_unclamped(color);
-                println!("Okhsv: {:?}", okhsv);
+                println!("Okhsv: {okhsv:?}");
                 let roundtrip_color = Oklab::from_color_unclamped(okhsv);
                 assert!(
                     Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                    "'{}' failed.\n{:?}\n!=\n{:?}",
-                    name,
-                    roundtrip_color,
-                    color
+                    "'{name}' failed.\n{roundtrip_color:?}\n!=\n{color:?}"
                 );
             }
         }
@@ -378,7 +374,7 @@ mod tests {
             let oklab_blue_64 = Oklab::<f64>::from_color_unclamped(lin_srgb_blue);
             let okhsv_blue_64 = Okhsv::from_color_unclamped(oklab_blue_64);
 
-            println!("Okhsv f64: {:?}\n", okhsv_blue_64);
+            println!("Okhsv f64: {okhsv_blue_64:?}\n");
             // HSV values of the reference implementation (in C)
             // 1 iteration : 264.0520206380550121, 0.9999910912349018, 0.9999999646150918
             // 2 iterations: 264.0520206380550121, 0.9999999869716002, 0.9999999646150844
@@ -418,7 +414,7 @@ mod tests {
             let okhsv = Okhsv::new(0.0_f32, 0.5, 0.5);
             let rgb = Srgb::from_color_unclamped(okhsv);
             let rgb8: Rgb<encoding::Srgb, u8> = rgb.into_format();
-            let hex_str = format!("{:x}", rgb8);
+            let hex_str = format!("{rgb8:x}");
             assert_eq!(hex_str, "7a4355");
         }
 
@@ -507,43 +503,42 @@ mod tests {
         {
             println!("sRGB Red");
             let oklab = Oklab::from_color_unclamped(LinSrgb::new(1.0, 0.0, 0.0));
-            println!("{:?}", oklab);
+            println!("{oklab:?}");
             let okhsv: Okhsv<f64> = Okhsv::from_color_unclamped(oklab);
-            println!("{:?}", okhsv);
+            println!("{okhsv:?}");
             assert!(okhsv.is_within_bounds());
         }
 
         {
             println!("Double sRGB Red");
             let oklab = Oklab::from_color_unclamped(LinSrgb::new(2.0, 0.0, 0.0));
-            println!("{:?}", oklab);
+            println!("{oklab:?}");
             let okhsv: Okhsv<f64> = Okhsv::from_color_unclamped(oklab);
-            println!("{:?}", okhsv);
+            println!("{okhsv:?}");
             assert!(!okhsv.is_within_bounds());
             let clamped_okhsv = okhsv.clamp();
-            println!("Clamped: {:?}", clamped_okhsv);
+            println!("Clamped: {clamped_okhsv:?}");
             assert!(clamped_okhsv.is_within_bounds());
             let linsrgb = LinSrgb::from_color_unclamped(clamped_okhsv);
-            println!("Clamped as unclamped Linear sRGB: {:?}", linsrgb);
+            println!("Clamped as unclamped Linear sRGB: {linsrgb:?}");
         }
 
         {
             println!("P3 Yellow");
             // display P3 yellow according to https://colorjs.io/apps/convert/?color=color(display-p3%201%201%200)&precision=17
             let oklab = Oklab::from_color_unclamped(LinSrgb::new(1.0, 1.0, -0.098273600140966));
-            println!("{:?}", oklab);
+            println!("{oklab:?}");
             let okhsv: Okhsv<f64> = Okhsv::from_color_unclamped(oklab);
-            println!("{:?}", okhsv);
+            println!("{okhsv:?}");
             assert!(!okhsv.is_within_bounds());
             let clamped_okhsv = okhsv.clamp();
-            println!("Clamped: {:?}", clamped_okhsv);
+            println!("Clamped: {clamped_okhsv:?}");
             assert!(clamped_okhsv.is_within_bounds());
             let linsrgb = LinSrgb::from_color_unclamped(clamped_okhsv);
             println!(
-                "Clamped as unclamped Linear sRGB: {:?}\n\
+                "Clamped as unclamped Linear sRGB: {linsrgb:?}\n\
                 May be different, but should be visually indistinguishable from\n\
-                color.js' gamut mapping red: 1 green: 0.9876530763223166 blue: 0",
-                linsrgb
+                color.js' gamut mapping red: 1 green: 0.9876530763223166 blue: 0"
             );
         }
     }

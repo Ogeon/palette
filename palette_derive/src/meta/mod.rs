@@ -2,10 +2,10 @@ use proc_macro2::TokenStream;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{
-    parse::{Parse, ParseStream, Parser, Result},
+    parse::{Parser, Result},
     token::Comma,
 };
-use syn::{Attribute, Fields, Ident, Index, LitStr, Meta, Token, Type};
+use syn::{Attribute, Fields, Ident, Index, Meta, Type};
 
 pub use self::field_attributes::*;
 pub use self::type_item_attributes::*;
@@ -138,27 +138,6 @@ pub fn assert_path_meta(meta: &Meta) -> Result<()> {
     }
 
     Ok(())
-}
-
-#[derive(PartialEq, Eq)]
-pub struct KeyValuePair {
-    pub key: Ident,
-    pub value: Ident,
-}
-
-impl Parse for KeyValuePair {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let key: Ident = input.parse()?;
-        input.parse::<Token![=]>()?;
-        let value = input.parse::<LitStr>()?.parse::<Ident>()?;
-        Ok(KeyValuePair { key, value })
-    }
-}
-
-impl PartialEq<str> for KeyValuePair {
-    fn eq(&self, other: &str) -> bool {
-        self.key == other
-    }
 }
 
 #[derive(Clone)]

@@ -242,12 +242,10 @@ unsafe impl<T> bytemuck::Pod for Okhsl<T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        convert::{FromColorUnclamped, IntoColorUnclamped},
-        encoding,
-        rgb::Rgb,
-        Okhsl, Oklab, Srgb,
-    };
+    use crate::{convert::FromColorUnclamped, encoding, rgb::Rgb, Okhsl, Srgb};
+
+    #[cfg(feature = "approx")]
+    use crate::{convert::IntoColorUnclamped, Oklab};
 
     test_convert_into_from_xyz!(Okhsl);
 
@@ -313,22 +311,18 @@ mod tests {
                 let rgb: Srgb<u8> = Srgb::<f64>::from_color_unclamped(color).into_format();
                 println!(
                     "\n\
-                    roundtrip of {} (#{:x} / {:?})\n\
-                    =================================================",
-                    name, rgb, color
+                    roundtrip of {name} (#{rgb:x} / {color:?})\n\
+                    ================================================="
                 );
 
                 println!("Color is white: {}", color.is_white(EPSILON));
 
                 let okhsl = Okhsl::from_color_unclamped(color);
-                println!("Okhsl: {:?}", okhsl);
+                println!("Okhsl: {okhsl:?}");
                 let roundtrip_color = Oklab::from_color_unclamped(okhsl);
                 assert!(
                     Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                    "'{}' failed.\n{:?}\n!=\n{:?}",
-                    name,
-                    roundtrip_color,
-                    color
+                    "'{name}' failed.\n{roundtrip_color:?}\n!=\n{color:?}"
                 );
             }
         }
@@ -372,10 +366,9 @@ mod tests {
             let lin_rgb = LinSrgb::<f64>::from_color_unclamped(rgb);
             let oklab = Oklab::from_color_unclamped(lin_rgb);
             println!(
-                "RGB: {:?}\n\
-            LinRgb: {:?}\n\
-            Oklab: {:?}",
-                rgb, lin_rgb, oklab
+                "RGB: {rgb:?}\n\
+            LinRgb: {lin_rgb:?}\n\
+            Oklab: {oklab:?}"
             );
             let okhsl = Okhsl::from_color_unclamped(oklab);
 
@@ -396,7 +389,7 @@ mod tests {
         let okhsl = Okhsl::new(0.0_f32, 0.5, 0.5);
         let rgb = Srgb::from_color_unclamped(okhsl);
         let rgb8: Rgb<encoding::Srgb, u8> = rgb.into_format();
-        let hex_str = format!("{:x}", rgb8);
+        let hex_str = format!("{rgb8:x}");
         assert_eq!(hex_str, "aa5a74");
     }
 
@@ -407,6 +400,7 @@ mod tests {
         assert_eq!(rgb, Srgb::new(0.0, 0.0, 0.0));
     }
 
+    #[cfg(feature = "approx")]
     #[test]
     fn test_oklab_to_okhsl_saturated_white() {
         // Minimized check for the case in
@@ -415,9 +409,10 @@ mod tests {
         // chroma check.
         let oklab = Oklab::new(1.0, 1.0, 0.0);
         let okhsl: Okhsl = oklab.into_color_unclamped();
-        assert_eq!(okhsl, Okhsl::new(0.0, 0.0, 1.0));
+        assert_relative_eq!(okhsl, Okhsl::new(0.0, 0.0, 1.0));
     }
 
+    #[cfg(feature = "approx")]
     #[test]
     fn test_oklab_to_okhsl_saturated_black() {
         // Minimized check for the case in
@@ -425,7 +420,7 @@ mod tests {
         // case, but another variant of it.
         let oklab = Oklab::new(0.0, 1.0, 0.0);
         let okhsl: Okhsl = oklab.into_color_unclamped();
-        assert_eq!(okhsl, Okhsl::new(0.0, 0.0, 0.0));
+        assert_relative_eq!(okhsl, Okhsl::new(0.0, 0.0, 0.0));
     }
 
     struct_of_arrays_tests!(

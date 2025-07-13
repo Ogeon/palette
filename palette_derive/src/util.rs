@@ -36,10 +36,7 @@ fn find_crate_name() -> Ident {
     match find_crate::find_crate(|name| name == "palette") {
         Ok(package) => Ident::new(&package.name, Span::call_site()),
         Err(Error::NotFound) => Ident::new("palette", Span::call_site()),
-        Err(error) => panic!(
-            "error when trying to find the name of the `palette` crate: {}",
-            error
-        ),
+        Err(error) => panic!("error when trying to find the name of the `palette` crate: {error}"),
     }
 }
 

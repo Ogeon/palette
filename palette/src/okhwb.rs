@@ -233,49 +233,37 @@ mod tests {
                     crate::Srgb::<f64>::from_color_unclamped(color).into_format();
                 println!(
                     "\n\
-                    roundtrip of {} (#{:x} / {:?})\n\
-                    =================================================",
-                    name, rgb, color
+                    roundtrip of {name} (#{rgb:x} / {color:?})\n\
+                    ================================================="
                 );
 
                 let okhsv = Okhsv::from_color_unclamped(color);
-                println!("Okhsv: {:?}", okhsv);
+                println!("Okhsv: {okhsv:?}");
                 let okhwb_from_okhsv = Okhwb::from_color_unclamped(okhsv);
                 let okhwb = Okhwb::from_color_unclamped(color);
-                println!("Okhwb: {:?}", okhwb);
+                println!("Okhwb: {okhwb:?}");
                 assert!(
                 Okhwb::visually_eq(okhwb, okhwb_from_okhsv, EPSILON),
-                "Okhwb \n{:?} is not visually equal to Okhwb from Okhsv \n{:?}\nwithin EPSILON {}",
-                okhwb,
-                okhwb_from_okhsv,
-                EPSILON
+                "Okhwb \n{okhwb:?} is not visually equal to Okhwb from Okhsv \n{okhwb_from_okhsv:?}\nwithin EPSILON {EPSILON}"
             );
                 let okhsv_from_okhwb = Okhsv::from_color_unclamped(okhwb);
                 assert!(
                 Okhsv::visually_eq(okhsv, okhsv_from_okhwb, EPSILON),
-                "Okhsv \n{:?} is not visually equal to Okhsv from Okhsv from Okhwb \n{:?}\nwithin EPSILON {}",
-                okhsv,
-                okhsv_from_okhwb, EPSILON
+                "Okhsv \n{okhsv:?} is not visually equal to Okhsv from Okhsv from Okhwb \n{okhsv_from_okhwb:?}\nwithin EPSILON {EPSILON}"
             );
 
                 let roundtrip_color = Oklab::from_color_unclamped(okhwb);
                 let oklab_from_okhsv = Oklab::from_color_unclamped(okhsv);
                 assert!(
                     Oklab::visually_eq(roundtrip_color, oklab_from_okhsv, EPSILON),
-                    "roundtrip color \n{:?} does not match \n{:?}\nwithin EPSILON {}",
-                    roundtrip_color,
-                    oklab_from_okhsv,
-                    EPSILON
+                    "roundtrip color \n{roundtrip_color:?} does not match \n{oklab_from_okhsv:?}\nwithin EPSILON {EPSILON}"
                 );
                 assert!(
                     Oklab::visually_eq(roundtrip_color, color, EPSILON),
-                    "'{}' failed.\n\
-                {:?}\n\
+                    "'{name}' failed.\n\
+                {roundtrip_color:?}\n\
                 !=\n\
-                \n{:?}\n",
-                    name,
-                    roundtrip_color,
-                    color
+                \n{color:?}\n"
                 );
             }
         }

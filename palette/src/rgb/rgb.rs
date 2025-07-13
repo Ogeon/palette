@@ -1168,16 +1168,14 @@ impl From<&'static str> for FromHexError {
 impl core::fmt::Display for FromHexError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FromHexError::ParseIntError(e) => write!(f, "{}", e),
+            FromHexError::ParseIntError(e) => write!(f, "{e}"),
             FromHexError::HexFormatError(s) => write!(
                 f,
-                "{}, please use format '#fff', 'fff', '#ffffff', 'ffffff', etc.",
-                s
+                "{s}, please use format '#fff', 'fff', '#ffffff', 'ffffff', etc."
             ),
             FromHexError::RgbaHexFormatError(s) => write!(
                 f,
-                "{}, please use format '#ffff', 'ffff', '#ffffffff', 'ffffffff', etc.",
-                s
+                "{s}, please use format '#ffff', 'ffff', '#ffffffff', 'ffffffff', etc."
             ),
         }
     }

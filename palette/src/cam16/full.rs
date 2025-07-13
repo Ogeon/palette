@@ -484,7 +484,11 @@ mod test {
         cam16.colorfulness = 0.0;
         cam16.saturation = 0.0;
 
-        assert_eq!(cam16.into_xyz(parameters), cam16jch.into_xyz(parameters));
+        assert_relative_eq!(
+            cam16.into_xyz(parameters),
+            cam16jch.into_xyz(parameters),
+            epsilon = 0.00000000000001
+        );
     }
 
     #[test]

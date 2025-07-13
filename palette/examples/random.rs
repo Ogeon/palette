@@ -111,6 +111,6 @@ fn main() {
     let _ = std::fs::create_dir("example-data/output");
     match image.save("example-data/output/random.png") {
         Ok(()) => println!("see 'example-data/output/random.png' for the result"),
-        Err(e) => println!("failed to write 'example-data/output/random.png': {}", e),
+        Err(e) => println!("failed to write 'example-data/output/random.png': {e}"),
     }
 }

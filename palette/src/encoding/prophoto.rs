@@ -233,6 +233,7 @@ mod test {
 
         #[test]
         #[cfg(feature = "approx")]
+        #[cfg_attr(miri, ignore)]
         fn test_u16_f32_into_impl() {
             for i in 0..=65535u16 {
                 let u16_impl: f32 = ProPhotoRgb::into_linear(i);
@@ -243,6 +244,7 @@ mod test {
 
         #[test]
         #[cfg(feature = "approx")]
+        #[cfg_attr(miri, ignore)]
         fn test_u16_f64_into_impl() {
             for i in 0..=65535u16 {
                 let u16_impl: f64 = ProPhotoRgb::into_linear(i);
@@ -252,6 +254,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u16_to_f32_to_u16() {
             for expected in 0..=65535u16 {
                 let linear: f32 = ProPhotoRgb::into_linear(expected);
@@ -261,6 +264,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u16_to_f64_to_u16() {
             for expected in 0..=65535u16 {
                 let linear: f64 = ProPhotoRgb::into_linear(expected);

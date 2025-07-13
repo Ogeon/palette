@@ -92,10 +92,7 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
     if !allowed_repr {
         errors.push(syn::Error::new(
             Span::call_site(),
-            format!(
-                "a `#[repr(C)]` or `#[repr(transparent)]` attribute is required to give `{}` a fixed memory layout",
-                ident
-            ),
+            format!("a `#[repr(C)]` or `#[repr(transparent)]` attribute is required to give `{ident}` a fixed memory layout"),
         ));
     }
 

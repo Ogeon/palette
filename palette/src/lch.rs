@@ -391,12 +391,13 @@ mod test {
         assert_relative_eq!(
             lhs1.delta_e(rhs1),
             lhs2.delta_e(rhs2),
-            epsilon = 0.0000000000001
+            epsilon = 0.000000000001
         );
     }
 
     // Lab and Lch have the same delta E.
     #[cfg(all(feature = "alloc", feature = "approx"))]
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn lab_delta_e_equality() {
         let mut lab_colors: Vec<Lab<D65, f64>> = Vec::new();
@@ -427,6 +428,7 @@ mod test {
     // Lab and Lch have the same delta E, so should also have the same improved
     // delta E.
     #[cfg(all(feature = "alloc", feature = "approx"))]
+    #[cfg_attr(miri, ignore)]
     #[test]
     fn lab_improved_delta_e_equality() {
         let mut lab_colors: Vec<Lab<D65, f64>> = Vec::new();

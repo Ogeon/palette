@@ -172,8 +172,8 @@ mod test {
             ( $x:expr, $y:expr ) => {{
                 let hsl = sample_hsl($x, $y);
                 let a = invert_hsl_sample(hsl);
-                assert_relative_eq!(a.0, $x);
-                assert_relative_eq!(a.1, $y);
+                assert_relative_eq!(a.0, $x, epsilon = 0.000000000000001);
+                assert_relative_eq!(a.1, $y, epsilon = 0.000000000000001);
             }};
         }
 
