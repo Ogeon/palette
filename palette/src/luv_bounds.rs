@@ -156,7 +156,7 @@ mod tests {
             line.intersect_length_at_angle(core::f64::consts::FRAC_PI_2)
                 .unwrap(),
             2.0,
-            epsilon = 0.000000000000001
+            epsilon = 0.00000000000001
         );
         assert_relative_eq!(
             line.intersect_length_at_angle(2.0 * core::f64::consts::FRAC_PI_3)
