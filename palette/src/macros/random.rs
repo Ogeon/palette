@@ -46,7 +46,7 @@ macro_rules! test_uniform_distribution {
             let mut rng = rand_mt::Mt::new(1234); // We want the same seed on every run to avoid random fails
 
             for _ in 0..SAMPLES {
-                let color: $ty = rng.gen();
+                let color: $ty = rng.random();
                 $(let color: $base_ty = crate::convert::IntoColorUnclamped::into_color_unclamped(color);)?
 
                 if $(color.$component < $component_min || color.$component > $component_max)||+ {
@@ -69,7 +69,7 @@ macro_rules! test_uniform_distribution {
         #[cfg_attr(miri, ignore)]
         #[test]
         fn uniform_distribution_uniform_sample() {
-            use rand::distributions::uniform::Uniform;
+            use rand::distr::uniform::Uniform;
             use rand::Rng;
 
             const BINS: usize = crate::random_sampling::test_utils::BINS;
@@ -78,7 +78,7 @@ macro_rules! test_uniform_distribution {
             $(let mut $component = [0; BINS];)+
 
             let mut rng = rand_mt::Mt::new(1234); // We want the same seed on every run to avoid random fails
-            let uniform_sampler = Uniform::new($min, $max);
+            let uniform_sampler = Uniform::new($min, $max).unwrap();
 
             for _ in 0..SAMPLES {
                 let color: $ty = rng.sample(&uniform_sampler);
@@ -104,7 +104,7 @@ macro_rules! test_uniform_distribution {
         #[cfg_attr(miri, ignore)]
         #[test]
         fn uniform_distribution_uniform_sample_inclusive() {
-            use rand::distributions::uniform::Uniform;
+            use rand::distr::uniform::Uniform;
             use rand::Rng;
 
             const BINS: usize = crate::random_sampling::test_utils::BINS;
@@ -113,7 +113,7 @@ macro_rules! test_uniform_distribution {
             $(let mut $component = [0; BINS];)+
 
             let mut rng = rand_mt::Mt::new(1234); // We want the same seed on every run to avoid random fails
-            let uniform_sampler = Uniform::new_inclusive($min, $max);
+            let uniform_sampler = Uniform::new_inclusive($min, $max).unwrap();
 
             for _ in 0..SAMPLES {
                 let color: $ty = rng.sample(&uniform_sampler);
@@ -169,15 +169,15 @@ macro_rules! impl_rand_traits_cartesian {
         $(where $($where: tt)+)?
     ) => {
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::Distribution<$ty<$($ty_param,)* T>> for rand::distributions::Standard
+        impl<$($ty_param,)* T> rand::distr::Distribution<$ty<$($ty_param,)* T>> for rand::distr::StandardUniform
         where
-            rand::distributions::Standard: rand::distributions::Distribution<T>,
+            rand::distr::StandardUniform: rand::distr::Distribution<T>,
             $($($where)+)?
         {
             #[allow(clippy::redundant_closure_call)]
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {
                 $ty {
-                    $($component: __apply_map_fn!(rng.gen::<T>() $(, $map_fn)?),)+
+                    $($component: __apply_map_fn!(rng.random::<T>() $(, $map_fn)?),)+
                     $($phantom: core::marker::PhantomData,)?
                 }
             }
@@ -187,57 +187,57 @@ macro_rules! impl_rand_traits_cartesian {
         #[cfg(feature = "random")]
         pub struct $uniform_ty<$($ty_param,)* T>
         where
-            T: rand::distributions::uniform::SampleUniform,
+            T: rand::distr::uniform::SampleUniform,
         {
-            $($component: rand::distributions::uniform::Uniform<T>,)+
+            $($component: rand::distr::uniform::Uniform<T>,)+
             $($phantom: core::marker::PhantomData<$phantom_ty>,)?
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::SampleUniform for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::SampleUniform for $ty<$($ty_param,)* T>
         where
-            T: rand::distributions::uniform::SampleUniform + Clone,
+            T: rand::distr::uniform::SampleUniform + Clone,
         {
             type Sampler = $uniform_ty<$($ty_param,)* T>;
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
         where
-            T: rand::distributions::uniform::SampleUniform + Clone,
+            T: rand::distr::uniform::SampleUniform + Clone,
         {
             type X = $ty<$($ty_param,)* T>;
 
-            fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 let low = low_b.borrow();
                 let high = high_b.borrow();
 
-                Self {
-                    $($component: rand::distributions::uniform::Uniform::new::<_, T>(low.$component.clone(), high.$component.clone()),)+
+                Ok(Self {
+                    $($component: rand::distr::uniform::Uniform::new::<_, T>(low.$component.clone(), high.$component.clone())?,)+
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
-            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 let low = low_b.borrow();
                 let high = high_b.borrow();
 
-                Self {
-                    $($component: rand::distributions::uniform::Uniform::new_inclusive::<_, T>(low.$component.clone(), high.$component.clone()),)+
+                Ok(Self {
+                    $($component: rand::distr::uniform::Uniform::new_inclusive::<_, T>(low.$component.clone(), high.$component.clone())?,)+
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {
-                use rand::distributions::Distribution;
+                use rand::distr::Distribution;
 
                 $ty {
                     $($component: self.$component.sample(rng),)+
@@ -283,18 +283,18 @@ macro_rules! impl_rand_traits_cylinder {
         $(where $($where: tt)+)?
     ) => {
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::Distribution<$ty<$($ty_param,)* T>> for rand::distributions::Standard
+        impl<$($ty_param,)* T> rand::distr::Distribution<$ty<$($ty_param,)* T>> for rand::distr::StandardUniform
         where
             T: crate::num::Sqrt,
-            rand::distributions::Standard: rand::distributions::Distribution<T> + rand::distributions::Distribution<$hue_ty<T>>,
+            rand::distr::StandardUniform: rand::distr::Distribution<T> + rand::distr::Distribution<$hue_ty<T>>,
             $($($where)+)?
         {
             #[allow(clippy::redundant_closure_call)]
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {
                 $ty {
-                    hue: rng.gen::<$hue_ty<T>>(),
-                    $height: __apply_map_fn!(rng.gen::<T>() $(, $height_map_fn)?),
-                    $radius: __apply_map_fn!(rng.gen::<T>().sqrt() $(, $radius_map_fn)?),
+                    hue: rng.random::<$hue_ty<T>>(),
+                    $height: __apply_map_fn!(rng.random::<T>() $(, $height_map_fn)?),
+                    $radius: __apply_map_fn!(rng.random::<T>().sqrt() $(, $radius_map_fn)?),
                     $($phantom: core::marker::PhantomData,)?
                 }
             }
@@ -304,73 +304,73 @@ macro_rules! impl_rand_traits_cylinder {
         #[cfg(feature = "random")]
         pub struct $uniform_ty<$($ty_param,)* T>
         where
-            T: rand::distributions::uniform::SampleUniform,
+            T: rand::distr::uniform::SampleUniform,
         {
             hue: crate::hues::$hue_uniform_ty<T>,
-            $height: rand::distributions::uniform::Uniform<T>,
-            $radius: rand::distributions::uniform::Uniform<T>,
+            $height: rand::distr::uniform::Uniform<T>,
+            $radius: rand::distr::uniform::Uniform<T>,
             $($phantom: core::marker::PhantomData<$phantom_ty>,)?
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::SampleUniform for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::SampleUniform for $ty<$($ty_param,)* T>
         where
-            T: crate::num::Sqrt + core::ops::Mul<Output = T> + Clone + rand::distributions::uniform::SampleUniform,
-            $hue_ty<T>: rand::distributions::uniform::SampleBorrow<$hue_ty<T>>,
-            crate::hues::$hue_uniform_ty<T>: rand::distributions::uniform::UniformSampler<X = $hue_ty<T>>,
+            T: crate::num::Sqrt + core::ops::Mul<Output = T> + Clone + rand::distr::uniform::SampleUniform,
+            $hue_ty<T>: rand::distr::uniform::SampleBorrow<$hue_ty<T>>,
+            crate::hues::$hue_uniform_ty<T>: rand::distr::uniform::UniformSampler<X = $hue_ty<T>>,
         {
             type Sampler = $uniform_ty<$($ty_param,)* T>;
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
         where
-            T: crate::num::Sqrt + core::ops::Mul<Output = T> + Clone + rand::distributions::uniform::SampleUniform,
-            $hue_ty<T>: rand::distributions::uniform::SampleBorrow<$hue_ty<T>>,
-            crate::hues::$hue_uniform_ty<T>: rand::distributions::uniform::UniformSampler<X = $hue_ty<T>>,
+            T: crate::num::Sqrt + core::ops::Mul<Output = T> + Clone + rand::distr::uniform::SampleUniform,
+            $hue_ty<T>: rand::distr::uniform::SampleBorrow<$hue_ty<T>>,
+            crate::hues::$hue_uniform_ty<T>: rand::distr::uniform::UniformSampler<X = $hue_ty<T>>,
         {
             type X = $ty<$($ty_param,)* T>;
 
-            fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 let low = low_b.borrow().clone();
                 let high = high_b.borrow().clone();
 
-                $uniform_ty {
-                    $height: rand::distributions::uniform::Uniform::new::<_, T>(low.$height, high.$height),
-                    $radius: rand::distributions::uniform::Uniform::new::<_, T>(
+                Ok($uniform_ty {
+                    $height: rand::distr::uniform::Uniform::new::<_, T>(low.$height, high.$height)?,
+                    $radius: rand::distr::uniform::Uniform::new::<_, T>(
                         low.$radius.clone() * low.$radius,
                         high.$radius.clone() * high.$radius,
-                    ),
-                    hue: crate::hues::$hue_uniform_ty::new(low.hue, high.hue),
+                    )?,
+                    hue: crate::hues::$hue_uniform_ty::new(low.hue, high.hue)?,
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
-            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 let low = low_b.borrow().clone();
                 let high = high_b.borrow().clone();
 
-                $uniform_ty {
-                    $height: rand::distributions::uniform::Uniform::new_inclusive::<_, T>(low.$height, high.$height),
-                    $radius: rand::distributions::uniform::Uniform::new_inclusive::<_, T>(
+                Ok($uniform_ty {
+                    $height: rand::distr::uniform::Uniform::new_inclusive::<_, T>(low.$height, high.$height)?,
+                    $radius: rand::distr::uniform::Uniform::new_inclusive::<_, T>(
                         low.$radius.clone() * low.$radius,
                         high.$radius.clone() * high.$radius,
-                    ),
-                    hue: crate::hues::$hue_uniform_ty::new_inclusive(low.hue, high.hue),
+                    )?,
+                    hue: crate::hues::$hue_uniform_ty::new_inclusive(low.hue, high.hue)?,
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {
-                use rand::distributions::Distribution;
+                use rand::distr::Distribution;
 
                 $ty {
                     $height: self.$height.sample(rng),
@@ -418,15 +418,15 @@ macro_rules! impl_rand_traits_hsv_cone {
         $(where $($where: tt)+)?
     ) => {
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::Distribution<$ty<$($ty_param,)* T>> for rand::distributions::Standard
+        impl<$($ty_param,)* T> rand::distr::Distribution<$ty<$($ty_param,)* T>> for rand::distr::StandardUniform
         where
             T: crate::num::Cbrt + crate::num::Sqrt,
-            rand::distributions::Standard: rand::distributions::Distribution<T> + rand::distributions::Distribution<$hue_ty<T>>,
+            rand::distr::StandardUniform: rand::distr::Distribution<T> + rand::distr::Distribution<$hue_ty<T>>,
         {
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {
-                let hue = rng.gen::<$hue_ty<T>>();
+                let hue = rng.random::<$hue_ty<T>>();
                 let crate::random_sampling::HsvSample { saturation: $radius, value: $height } =
-                    crate::random_sampling::sample_hsv(rng.gen(), rng.gen());
+                    crate::random_sampling::sample_hsv(rng.random(), rng.random());
 
                 $ty {
                     hue,
@@ -441,37 +441,37 @@ macro_rules! impl_rand_traits_hsv_cone {
         #[cfg(feature = "random")]
         pub struct $uniform_ty<$($ty_param,)* T>
         where
-            T: rand::distributions::uniform::SampleUniform,
+            T: rand::distr::uniform::SampleUniform,
         {
             hue: crate::hues::$hue_uniform_ty<T>,
-            u1: rand::distributions::uniform::Uniform<T>,
-            u2: rand::distributions::uniform::Uniform<T>,
+            u1: rand::distr::uniform::Uniform<T>,
+            u2: rand::distr::uniform::Uniform<T>,
             $($phantom: core::marker::PhantomData<$phantom_ty>,)?
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::SampleUniform for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::SampleUniform for $ty<$($ty_param,)* T>
         where
-            T: crate::num::Cbrt + crate::num::Sqrt + crate::num::Powi + Clone + rand::distributions::uniform::SampleUniform,
-            $hue_ty<T>: rand::distributions::uniform::SampleBorrow<$hue_ty<T>>,
-            crate::hues::$hue_uniform_ty<T>: rand::distributions::uniform::UniformSampler<X = $hue_ty<T>>,
+            T: crate::num::Cbrt + crate::num::Sqrt + crate::num::Powi + Clone + rand::distr::uniform::SampleUniform,
+            $hue_ty<T>: rand::distr::uniform::SampleBorrow<$hue_ty<T>>,
+            crate::hues::$hue_uniform_ty<T>: rand::distr::uniform::UniformSampler<X = $hue_ty<T>>,
         {
             type Sampler = $uniform_ty<$($ty_param,)* T>;
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
         where
-            T: crate::num::Cbrt + crate::num::Sqrt + crate::num::Powi + Clone + rand::distributions::uniform::SampleUniform,
-            $hue_ty<T>: rand::distributions::uniform::SampleBorrow<$hue_ty<T>>,
-            crate::hues::$hue_uniform_ty<T>: rand::distributions::uniform::UniformSampler<X = $hue_ty<T>>,
+            T: crate::num::Cbrt + crate::num::Sqrt + crate::num::Powi + Clone + rand::distr::uniform::SampleUniform,
+            $hue_ty<T>: rand::distr::uniform::SampleBorrow<$hue_ty<T>>,
+            crate::hues::$hue_uniform_ty<T>: rand::distr::uniform::UniformSampler<X = $hue_ty<T>>,
         {
             type X = $ty<$($ty_param,)* T>;
 
-            fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 let low = low_b.borrow().clone();
                 let high = high_b.borrow().clone();
@@ -487,18 +487,18 @@ macro_rules! impl_rand_traits_hsv_cone {
                         saturation: high.$radius,
                     });
 
-                $uniform_ty {
-                    hue: crate::hues::$hue_uniform_ty::new(low.hue, high.hue),
-                    u1: rand::distributions::uniform::Uniform::new::<_, T>(r1_min, r1_max),
-                    u2: rand::distributions::uniform::Uniform::new::<_, T>(r2_min, r2_max),
+                Ok($uniform_ty {
+                    hue: crate::hues::$hue_uniform_ty::new(low.hue, high.hue)?,
+                    u1: rand::distr::uniform::Uniform::new::<_, T>(r1_min, r1_max)?,
+                    u2: rand::distr::uniform::Uniform::new::<_, T>(r2_min, r2_max)?,
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
-            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 let low = low_b.borrow().clone();
                 let high = high_b.borrow().clone();
@@ -514,16 +514,16 @@ macro_rules! impl_rand_traits_hsv_cone {
                         saturation: high.$radius,
                     });
 
-                $uniform_ty {
-                    hue: crate::hues::$hue_uniform_ty::new_inclusive(low.hue, high.hue),
-                    u1: rand::distributions::uniform::Uniform::new_inclusive::<_, T>(r1_min, r1_max),
-                    u2: rand::distributions::uniform::Uniform::new_inclusive::<_, T>(r2_min, r2_max),
+                Ok($uniform_ty {
+                    hue: crate::hues::$hue_uniform_ty::new_inclusive(low.hue, high.hue)?,
+                    u1: rand::distr::uniform::Uniform::new_inclusive::<_, T>(r1_min, r1_max)?,
+                    u2: rand::distr::uniform::Uniform::new_inclusive::<_, T>(r2_min, r2_max)?,
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {
-                use rand::distributions::Distribution;
+                use rand::distr::Distribution;
 
                 let hue = self.hue.sample(rng);
                 let crate::random_sampling::HsvSample { saturation: $radius, value: $height } =
@@ -575,17 +575,17 @@ macro_rules! impl_rand_traits_hsl_bicone {
         $(where $($where: tt)+)?
     ) => {
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::Distribution<$ty<$($ty_param,)* T>> for rand::distributions::Standard
+        impl<$($ty_param,)* T> rand::distr::Distribution<$ty<$($ty_param,)* T>> for rand::distr::StandardUniform
         where
             T: crate::num::Real + crate::num::One + crate::num::Cbrt + crate::num::Sqrt + crate::num::Arithmetics + crate::num::PartialCmp + Clone,
             T::Mask: crate::bool_mask::LazySelect<T> + Clone,
-            rand::distributions::Standard: rand::distributions::Distribution<T> + rand::distributions::Distribution<$hue_ty<T>>,
+            rand::distr::StandardUniform: rand::distr::Distribution<T> + rand::distr::Distribution<$hue_ty<T>>,
         {
             #[allow(clippy::redundant_closure_call)]
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {
-                let hue = rng.gen::<$hue_ty<T>>();
+                let hue = rng.random::<$hue_ty<T>>();
                 let crate::random_sampling::HslSample { saturation, lightness } =
-                    crate::random_sampling::sample_hsl(rng.gen(), rng.gen());
+                    crate::random_sampling::sample_hsl(rng.random(), rng.random());
 
                 $ty {
                     hue,
@@ -600,40 +600,40 @@ macro_rules! impl_rand_traits_hsl_bicone {
         #[cfg(feature = "random")]
         pub struct $uniform_ty<$($ty_param,)* T>
         where
-            T: rand::distributions::uniform::SampleUniform,
+            T: rand::distr::uniform::SampleUniform,
         {
             hue: crate::hues::$hue_uniform_ty<T>,
-            u1: rand::distributions::uniform::Uniform<T>,
-            u2: rand::distributions::uniform::Uniform<T>,
+            u1: rand::distr::uniform::Uniform<T>,
+            u2: rand::distr::uniform::Uniform<T>,
             $($phantom: core::marker::PhantomData<$phantom_ty>,)?
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::SampleUniform for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::SampleUniform for $ty<$($ty_param,)* T>
         where
-            T: crate::num::Real + crate::num::One + crate::num::Cbrt + crate::num::Sqrt + crate::num::Powi + crate::num::Arithmetics + crate::num::PartialCmp + Clone + rand::distributions::uniform::SampleUniform,
+            T: crate::num::Real + crate::num::One + crate::num::Cbrt + crate::num::Sqrt + crate::num::Powi + crate::num::Arithmetics + crate::num::PartialCmp + Clone + rand::distr::uniform::SampleUniform,
             T::Mask: crate::bool_mask::LazySelect<T> + Clone,
-            $hue_ty<T>: rand::distributions::uniform::SampleBorrow<$hue_ty<T>>,
-            crate::hues::$hue_uniform_ty<T>: rand::distributions::uniform::UniformSampler<X = $hue_ty<T>>,
+            $hue_ty<T>: rand::distr::uniform::SampleBorrow<$hue_ty<T>>,
+            crate::hues::$hue_uniform_ty<T>: rand::distr::uniform::UniformSampler<X = $hue_ty<T>>,
         {
             type Sampler = $uniform_ty<$($ty_param,)* T>;
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
         where
-            T: crate::num::Real + crate::num::One + crate::num::Cbrt + crate::num::Sqrt + crate::num::Powi + crate::num::Arithmetics + crate::num::PartialCmp + Clone + rand::distributions::uniform::SampleUniform,
+            T: crate::num::Real + crate::num::One + crate::num::Cbrt + crate::num::Sqrt + crate::num::Powi + crate::num::Arithmetics + crate::num::PartialCmp + Clone + rand::distr::uniform::SampleUniform,
             T::Mask: crate::bool_mask::LazySelect<T> + Clone,
-            $hue_ty<T>: rand::distributions::uniform::SampleBorrow<$hue_ty<T>>,
-            crate::hues::$hue_uniform_ty<T>: rand::distributions::uniform::UniformSampler<X = $hue_ty<T>>,
+            $hue_ty<T>: rand::distr::uniform::SampleBorrow<$hue_ty<T>>,
+            crate::hues::$hue_uniform_ty<T>: rand::distr::uniform::UniformSampler<X = $hue_ty<T>>,
         {
             type X = $ty<$($ty_param,)* T>;
 
             #[allow(clippy::redundant_closure_call)]
-            fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 let low = low_b.borrow().clone();
                 let high = high_b.borrow().clone();
@@ -649,19 +649,19 @@ macro_rules! impl_rand_traits_hsl_bicone {
                         saturation: __apply_map_fn!(high.$radius $(, $height_unmap_fn)?),
                     });
 
-                $uniform_ty {
-                    hue: crate::hues::$hue_uniform_ty::new(low.hue, high.hue),
-                    u1: rand::distributions::uniform::Uniform::new::<_, T>(r1_min, r1_max),
-                    u2: rand::distributions::uniform::Uniform::new::<_, T>(r2_min, r2_max),
+                Ok($uniform_ty {
+                    hue: crate::hues::$hue_uniform_ty::new(low.hue, high.hue)?,
+                    u1: rand::distr::uniform::Uniform::new::<_, T>(r1_min, r1_max)?,
+                    u2: rand::distr::uniform::Uniform::new::<_, T>(r2_min, r2_max)?,
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
             #[allow(clippy::redundant_closure_call)]
-            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 let low = low_b.borrow().clone();
                 let high = high_b.borrow().clone();
@@ -677,17 +677,17 @@ macro_rules! impl_rand_traits_hsl_bicone {
                         saturation: __apply_map_fn!(high.$radius $(, $height_unmap_fn)?),
                     });
 
-                $uniform_ty {
-                    hue: crate::hues::$hue_uniform_ty::new_inclusive(low.hue, high.hue),
-                    u1: rand::distributions::uniform::Uniform::new_inclusive::<_, T>(r1_min, r1_max),
-                    u2: rand::distributions::uniform::Uniform::new_inclusive::<_, T>(r2_min, r2_max),
+                Ok($uniform_ty {
+                    hue: crate::hues::$hue_uniform_ty::new_inclusive(low.hue, high.hue)?,
+                    u1: rand::distr::uniform::Uniform::new_inclusive::<_, T>(r1_min, r1_max)?,
+                    u2: rand::distr::uniform::Uniform::new_inclusive::<_, T>(r2_min, r2_max)?,
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
             #[allow(clippy::redundant_closure_call)]
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {
-                use rand::distributions::Distribution;
+                use rand::distr::Distribution;
 
                 let hue = self.hue.sample(rng);
                 let crate::random_sampling::HslSample { saturation, lightness } =
@@ -742,14 +742,14 @@ macro_rules! impl_rand_traits_hwb_cone {
         $(where $($where: tt)+)?
     ) => {
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::Distribution<$ty<$($ty_param,)* T>> for rand::distributions::Standard
+        impl<$($ty_param,)* T> rand::distr::Distribution<$ty<$($ty_param,)* T>> for rand::distr::StandardUniform
         where
-            rand::distributions::Standard: rand::distributions::Distribution<$hsv_ty<$($ty_param,)* T>>,
+            rand::distr::StandardUniform: rand::distr::Distribution<$hsv_ty<$($ty_param,)* T>>,
             $ty<$($ty_param,)* T>: crate::convert::FromColorUnclamped<$hsv_ty<$($ty_param,)* T>>,
         {
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {
                 use crate::convert::FromColorUnclamped;
-                $ty::from_color_unclamped(rng.gen::<$hsv_ty<$($ty_param,)* T>>())
+                $ty::from_color_unclamped(rng.random::<$hsv_ty<$($ty_param,)* T>>())
             }
         }
 
@@ -757,37 +757,37 @@ macro_rules! impl_rand_traits_hwb_cone {
         #[cfg(feature = "random")]
         pub struct $uniform_ty<$($ty_param,)* T>
         where
-            T: rand::distributions::uniform::SampleUniform,
+            T: rand::distr::uniform::SampleUniform,
         {
             sampler: $hsv_uniform_ty<$($ty_param,)* T>,
             $($phantom: core::marker::PhantomData<$phantom_ty>,)?
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::SampleUniform for $ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::SampleUniform for $ty<$($ty_param,)* T>
         where
-            T: crate::num::MinMax + Clone + rand::distributions::uniform::SampleUniform,
-            $hsv_ty<$($ty_param,)* T>: crate::convert::FromColorUnclamped<$ty<$($ty_param,)* T>> + rand::distributions::uniform::SampleBorrow<$hsv_ty<$($ty_param,)* T>>,
+            T: crate::num::MinMax + Clone + rand::distr::uniform::SampleUniform,
+            $hsv_ty<$($ty_param,)* T>: crate::convert::FromColorUnclamped<$ty<$($ty_param,)* T>> + rand::distr::uniform::SampleBorrow<$hsv_ty<$($ty_param,)* T>>,
             $ty<$($ty_param,)* T>: crate::convert::FromColorUnclamped<$hsv_ty<$($ty_param,)* T>>,
-            $hsv_uniform_ty<$($ty_param,)* T>: rand::distributions::uniform::UniformSampler<X = $hsv_ty<$($ty_param,)* T>>,
+            $hsv_uniform_ty<$($ty_param,)* T>: rand::distr::uniform::UniformSampler<X = $hsv_ty<$($ty_param,)* T>>,
         {
             type Sampler = $uniform_ty<$($ty_param,)* T>;
         }
 
         #[cfg(feature = "random")]
-        impl<$($ty_param,)* T> rand::distributions::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
+        impl<$($ty_param,)* T> rand::distr::uniform::UniformSampler for $uniform_ty<$($ty_param,)* T>
         where
-            T: crate::num::MinMax + Clone + rand::distributions::uniform::SampleUniform,
-            $hsv_ty<$($ty_param,)* T>: crate::convert::FromColorUnclamped<$ty<$($ty_param,)* T>> + rand::distributions::uniform::SampleBorrow<$hsv_ty<$($ty_param,)* T>>,
+            T: crate::num::MinMax + Clone + rand::distr::uniform::SampleUniform,
+            $hsv_ty<$($ty_param,)* T>: crate::convert::FromColorUnclamped<$ty<$($ty_param,)* T>> + rand::distr::uniform::SampleBorrow<$hsv_ty<$($ty_param,)* T>>,
             $ty<$($ty_param,)* T>: crate::convert::FromColorUnclamped<$hsv_ty<$($ty_param,)* T>>,
-            $hsv_uniform_ty<$($ty_param,)* T>: rand::distributions::uniform::UniformSampler<X = $hsv_ty<$($ty_param,)* T>>,
+            $hsv_uniform_ty<$($ty_param,)* T>: rand::distr::uniform::UniformSampler<X = $hsv_ty<$($ty_param,)* T>>,
         {
             type X = $ty<$($ty_param,)* T>;
 
-            fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 use crate::convert::FromColorUnclamped;
                 let low_input = $hsv_ty::from_color_unclamped(low_b.borrow().clone());
@@ -809,18 +809,18 @@ macro_rules! impl_rand_traits_hwb_cone {
                     $($phantom: core::marker::PhantomData,)?
                 };
 
-                let sampler = $hsv_uniform_ty::<$($ty_param,)* T>::new(low, high);
+                let sampler = $hsv_uniform_ty::<$($ty_param,)* T>::new(low, high)?;
 
-                $uniform_ty {
+                Ok($uniform_ty {
                     sampler,
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
-            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+            fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Result<Self, rand::distr::uniform::Error>
             where
-                B1: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
-                B2: rand::distributions::uniform::SampleBorrow<Self::X> + Sized,
+                B1: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
+                B2: rand::distr::uniform::SampleBorrow<Self::X> + Sized,
             {
                 use crate::convert::FromColorUnclamped;
                 let low_input = $hsv_ty::from_color_unclamped(low_b.borrow().clone());
@@ -842,12 +842,12 @@ macro_rules! impl_rand_traits_hwb_cone {
                     $($phantom: core::marker::PhantomData,)?
                 };
 
-                let sampler = $hsv_uniform_ty::<$($ty_param,)* T>::new_inclusive(low, high);
+                let sampler = $hsv_uniform_ty::<$($ty_param,)* T>::new_inclusive(low, high)?;
 
-                $uniform_ty {
+                Ok($uniform_ty {
                     sampler,
                     $($phantom: core::marker::PhantomData,)?
-                }
+                })
             }
 
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $ty<$($ty_param,)* T> {

@@ -19,7 +19,7 @@ fn main() {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                let random_color: Srgb = Srgb::new(rng.gen(), rng.gen(), rng.gen());
+                let random_color: Srgb = Srgb::new(rng.random(), rng.random(), rng.random());
                 sub_image.put_pixel(x, y, image::Rgb(random_color.into_format().into()));
             }
         }
@@ -30,7 +30,7 @@ fn main() {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                let random_color: Srgb = rng.gen();
+                let random_color: Srgb = rng.random();
                 sub_image.put_pixel(x, y, image::Rgb(random_color.into_format().into()));
             }
         }
@@ -43,7 +43,7 @@ fn main() {
         for x in 0..width {
             for y in 0..height {
                 let random_color: Srgb =
-                    Hsv::new(rng.gen::<RgbHue>(), rng.gen(), rng.gen()).into_color();
+                    Hsv::new(rng.random::<RgbHue>(), rng.random(), rng.random()).into_color();
                 sub_image.put_pixel(x, y, image::Rgb(random_color.into_format().into()));
             }
         }
@@ -54,7 +54,7 @@ fn main() {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                let random_color: Srgb = rng.gen::<Hsv>().into_color();
+                let random_color: Srgb = rng.random::<Hsv>().into_color();
                 sub_image.put_pixel(x, y, image::Rgb(random_color.into_format().into()));
             }
         }
@@ -67,7 +67,7 @@ fn main() {
         for x in 0..width {
             for y in 0..height {
                 let random_color: Srgb =
-                    Hsl::new(rng.gen::<RgbHue>(), rng.gen(), rng.gen()).into_color();
+                    Hsl::new(rng.random::<RgbHue>(), rng.random(), rng.random()).into_color();
                 sub_image.put_pixel(x, y, image::Rgb(random_color.into_format().into()));
             }
         }
@@ -78,7 +78,7 @@ fn main() {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                let random_color: Srgb = rng.gen::<Hsl>().into_color();
+                let random_color: Srgb = rng.random::<Hsl>().into_color();
                 sub_image.put_pixel(x, y, image::Rgb(random_color.into_format().into()));
             }
         }
@@ -91,7 +91,7 @@ fn main() {
         for x in 0..width {
             for y in 0..height {
                 let random_color: Srgb =
-                    Hwb::new(rng.gen::<RgbHue>(), rng.gen(), rng.gen()).into_color();
+                    Hwb::new(rng.random::<RgbHue>(), rng.random(), rng.random()).into_color();
                 sub_image.put_pixel(x, y, image::Rgb(random_color.into_format().into()));
             }
         }
@@ -102,7 +102,7 @@ fn main() {
         let (width, height) = sub_image.dimensions();
         for x in 0..width {
             for y in 0..height {
-                let random_color: Srgb = rng.gen::<Hwb>().into_color();
+                let random_color: Srgb = rng.random::<Hwb>().into_color();
                 sub_image.put_pixel(x, y, image::Rgb(random_color.into_format().into()));
             }
         }
