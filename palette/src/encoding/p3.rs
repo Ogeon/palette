@@ -2,17 +2,21 @@
 
 use core::marker::PhantomData;
 
+use palette_math::{
+    gamma::lut::GammaLutBuilder,
+    lut::{ArrayTable, SliceTable},
+};
+
 use crate::{
-    encoding::{
-        lut::{self, p3::*},
-        FromLinear, IntoLinear, Srgb,
-    },
+    encoding::{lut::p3::*, FromLinear, IntoLinear, Srgb},
     luma::LumaStandard,
     num::{Powf, Real},
     rgb::{Primaries, RgbSpace, RgbStandard},
     white_point::{Any, WhitePoint, D65},
     Mat3, Xyz, Yxy,
 };
+
+use super::{FromLinearLut, GetLutBuilder, IntoLinearLut};
 
 /// The theatrical DCI-P3 standard.
 ///
@@ -177,6 +181,29 @@ impl<F> LumaStandard for DciP3Plus<F> {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct P3Gamma;
 
+impl P3Gamma {
+    /// Access the pre-generated lookup table for non-linear `u8` to linear `f32` conversion.
+    pub fn get_u8_to_f32_lut() -> IntoLinearLut<u8, f32, Self, &'static ArrayTable<256>> {
+        IntoLinearLut::from(P3_GAMMA_U8_TO_F32.get_ref())
+    }
+
+    /// Access the pre-generated lookup table for non-linear `u8` to linear `f64` conversion.
+    pub fn get_u8_to_f64_lut() -> IntoLinearLut<u8, f64, Self, &'static ArrayTable<256>> {
+        IntoLinearLut::from(P3_GAMMA_U8_TO_F64.get_ref())
+    }
+
+    /// Access the pre-generated lookup table for linear `f32` to non-linear `u8` conversion.
+    pub fn get_f32_to_u8_lut() -> FromLinearLut<f32, u8, Self, &'static SliceTable> {
+        FromLinearLut::from_table(P3_GAMMA_F32_TO_U8.get_slice())
+    }
+}
+
+impl GetLutBuilder for P3Gamma {
+    fn get_lut_builder() -> GammaLutBuilder {
+        palette_math::gamma::p3_builder()
+    }
+}
+
 impl<T> IntoLinear<T, T> for P3Gamma
 where
     T: Real + Powf,
@@ -200,21 +227,21 @@ where
 impl IntoLinear<f32, u8> for P3Gamma {
     #[inline]
     fn into_linear(encoded: u8) -> f32 {
-        P3_GAMMA_U8_TO_F32[encoded as usize]
+        *P3_GAMMA_U8_TO_F32.lookup(encoded)
     }
 }
 
 impl FromLinear<f32, u8> for P3Gamma {
     #[inline]
     fn from_linear(linear: f32) -> u8 {
-        lut::linear_f32_to_encoded_u8(linear, P3_GAMMA_MIN_FLOAT, &TO_P3_GAMMA_U8)
+        P3_GAMMA_F32_TO_U8.lookup(linear)
     }
 }
 
 impl IntoLinear<f64, u8> for P3Gamma {
     #[inline]
     fn into_linear(encoded: u8) -> f64 {
-        P3_GAMMA_U8_TO_F64[encoded as usize]
+        *P3_GAMMA_U8_TO_F64.lookup(encoded)
     }
 }
 
@@ -387,9 +414,13 @@ mod test {
     }
 
     mod lut {
-        use crate::encoding::{FromLinear, IntoLinear, P3Gamma};
+        use crate::{
+            encoding::{FromLinear, IntoLinear, P3Gamma},
+            rgb,
+        };
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         #[cfg(feature = "approx")]
         fn test_u8_f32_into_impl() {
             for i in 0..=255u8 {
@@ -400,6 +431,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         #[cfg(feature = "approx")]
         fn test_u8_f64_into_impl() {
             for i in 0..=255u8 {
@@ -410,6 +442,7 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u8_to_f32_to_u8() {
             for expected in 0u8..=255u8 {
                 let linear: f32 = P3Gamma::into_linear(expected);
@@ -419,12 +452,31 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(miri, ignore)]
         fn u8_to_f64_to_u8() {
             for expected in 0u8..=255u8 {
                 let linear: f64 = P3Gamma::into_linear(expected);
                 let result: u8 = P3Gamma::from_linear(linear);
                 assert_eq!(result, expected);
             }
+        }
+
+        #[test]
+        fn constant_lut() {
+            let decode_lut = P3Gamma::get_u8_to_f32_lut();
+            let decode_lut_64 = P3Gamma::get_u8_to_f64_lut();
+            let encode_lut = P3Gamma::get_f32_to_u8_lut();
+
+            let linear: rgb::LinDciP3<f32> = decode_lut.lookup_rgb(rgb::DciP3::new(23, 198, 76));
+            let _: rgb::DciP3<u8> = encode_lut.lookup_rgb(linear);
+
+            let linear: rgb::LinDciP3Plus<_, f32> =
+                decode_lut.lookup_rgb(rgb::DciP3Plus::new(23, 198, 76));
+            let _: rgb::DciP3Plus<_, u8> = encode_lut.lookup_rgb(linear);
+
+            let _: rgb::LinDciP3<f64> = decode_lut_64.lookup_rgb(rgb::DciP3::new(23, 198, 76));
+            let _: rgb::LinDciP3Plus<_, f64> =
+                decode_lut_64.lookup_rgb(rgb::DciP3Plus::new(23, 198, 76));
         }
     }
 }

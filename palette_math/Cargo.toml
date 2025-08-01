@@ -1,0 +1,26 @@
+[package]
+name = "palette_math"
+version = "0.7.6" #automatically updated
+authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
+exclude = []
+description = "The low level color math behind the more high level `palette` crate."
+documentation = "https://docs.rs/palette_math/0.7.6/palette_math/"
+repository = "https://github.com/Ogeon/palette"
+readme = "README.md"
+keywords = ["color", "conversion", "linear", "pixel", "rgb"]
+license = "MIT OR Apache-2.0"
+edition = "2021"
+resolver = "2"
+categories = ["graphics", "multimedia::images", "no-std"]
+rust-version = "1.61.0"
+
+[features]
+default=["std"]
+std = ["alloc"]
+alloc = []
+libm = ["dep:libm"]
+wide = ["dep:wide"]
+
+[dependencies]
+libm = { version = "0.2.1", default-features = false, optional = true }
+wide = { version = "0.7.3", default-features = false, optional = true }

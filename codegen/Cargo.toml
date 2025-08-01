@@ -10,6 +10,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
+palette_math = {path = "../palette_math"}
 anyhow = "1.0.86"
 proc-macro2 = "1.0.86"
 quote = "1.0.37"

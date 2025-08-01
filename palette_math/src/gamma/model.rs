@@ -1,4 +1,6 @@
-use super::TransferFn;
+use super::lut::GammaLutBuilder;
+
+use crate::num::{Powf, Powi};
 
 /// This struct contains the scale and bias for a linear
 /// regression model of a transfer function on a given interval.
@@ -12,14 +14,14 @@ pub(super) struct LinearModel {
 
 impl LinearModel {
     pub(super) fn new(
-        transfer_fn: &TransferFn,
+        transfer_fn: &GammaLutBuilder,
         start: u32,
         end: u32,
         man_index_width: u32,
         t_width: u32,
     ) -> Self {
-        let TransferFn {
-            linear_scale,
+        let GammaLutBuilder {
+            linear_slope: linear_scale,
             alpha,
             beta,
             gamma,
@@ -44,12 +46,12 @@ impl LinearModel {
             }
         }
 
-        let max_t = 2.0f64.powi(t_width as i32);
+        let max_t = Powi::powi(2.0f64, t_width as i32);
 
         let (integral_y, integral_ty) = match linear_scale {
             Some(linear_scale) if start < beta_bits => {
-                let beta_t =
-                    (beta_bits << (9 + man_index_width)) as f64 * 2.0f64.powi(t_width as i32 - 32);
+                let beta_t = (beta_bits << (9 + man_index_width)) as f64
+                    * Powi::powi(2.0f64, t_width as i32 - 32);
                 let int_linear =
                     integrate_linear((start_x, beta), (0.0, beta_t), linear_scale, exp_scale);
                 let int_exponential =
@@ -111,12 +113,13 @@ fn integrate_exponential(
 ) -> (f64, f64) {
     let one_plus_gamma_inv = 1.0 + gamma.recip();
     let antiderive_y = |x: f64, t: f64| {
-        alpha * gamma * x.powf(one_plus_gamma_inv) / (exp_scale * (1.0 + gamma)) + (1.0 - alpha) * t
+        alpha * gamma * Powf::powf(x, one_plus_gamma_inv) / (exp_scale * (1.0 + gamma))
+            + (1.0 - alpha) * t
     };
     let antiderive_ty = |x: f64, t: f64| {
         alpha
             * gamma
-            * x.powf(one_plus_gamma_inv)
+            * Powf::powf(x, one_plus_gamma_inv)
             * (t - gamma * x / (exp_scale * (1.0 + 2.0 * gamma)))
             / (exp_scale * (1.0 + gamma))
             + 0.5 * (1.0 - alpha) * t * t

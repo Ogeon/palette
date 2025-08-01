@@ -52,8 +52,12 @@ jobs:
         run: cargo clippy -v -p palette --all-features
       - name: Test all features
         run: cargo test -v -p palette --all-features
-      - name: Test each feature
-        run: cargo hack test --tests --feature-powerset --ignore-private --skip default,find-crate --optional-deps libm --depth 2
+      - name: Test each palette feature
+        run: cargo hack test -p palette --tests --feature-powerset --skip default,find-crate,named_from_str --features palette_math/libm --depth 2
+      - name: Test each palette_math feature
+        run: cargo hack test -p palette_math --tests --feature-powerset --skip default --depth 2
+      - name: Test each palette_derive feature
+        run: cargo hack test -p palette_derive --tests --feature-powerset --depth 2
   integration_tests:
     name: integration tests
     strategy:
