@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["adobe","gamma","linear","p3","prophoto","rec_standards","srgb"],"trait":["FromLinear","IntoLinear"]};
+window.SIDEBAR_ITEMS = {"mod":["adobe","gamma","linear","p3","prophoto","rec_standards","srgb"],"struct":["FromLinearLut","IntoLinearLut"],"trait":["FromLinear","GetLutBuilder","IntoLinear"]};
