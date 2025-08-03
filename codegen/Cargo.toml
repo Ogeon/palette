@@ -14,7 +14,7 @@ palette_math = {path = "../palette_math"}
 anyhow = "1.0.86"
 proc-macro2 = "1.0.86"
 quote = "1.0.37"
-phf = "0.11.2"
-phf_codegen = "0.11.2"
+phf = "0.12.1"
+phf_codegen = "0.12.1"
 
 
