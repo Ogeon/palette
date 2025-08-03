@@ -104,7 +104,7 @@ fn build_from_str(entries: &[ColorEntry]) -> TokenStream {
     let mut map = phf_codegen::Map::new();
 
     for entry in entries {
-        map.entry(&*entry.name, &entry.constant.to_string());
+        map.entry(&*entry.name, entry.constant.to_string());
     }
 
     let phf_entries: TokenStream = map
