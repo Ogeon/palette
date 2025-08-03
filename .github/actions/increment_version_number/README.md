@@ -55,13 +55,13 @@ npm install
 will install the dependencies. Then run the script by providing the repository owner and name:
 
 ```shell
-node local/index.js path/to/crate 1.2.3
+node local/index.js 1.2.3 path/to/crate
 ```
 
 Or add a version argument to set the upcoming version instead of "Unreleased":
 
 ```shell
-node local/index.js path/to/crate 1.2.3 '{"companion_crate": "4.5.6"}'
+node local/index.js 1.2.3 path/to/crate '{"companion_crate": "4.5.6"}'
 ```
 
 ## Developing

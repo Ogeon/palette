@@ -8,25 +8,33 @@ on:
 
 jobs:
   compile_and_test:
-    name: Update version and release notes
+    name: Update version, generated code, and release notes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # We want the full history and all tags
+      - uses: dtolnay/rust-toolchain@stable
       - name: Increment version for palette_derive
         uses: ./.github/actions/increment_version_number
         with:
           version: ${{ github.event.inputs.version }}
           crate: palette_derive
+      - name: Increment version for palette_math
+        uses: ./.github/actions/increment_version_number
+        with:
+          version: ${{ github.event.inputs.version }}
+          crate: palette_math
       - name: Increment version for palette
         uses: ./.github/actions/increment_version_number
         with:
           version: ${{ github.event.inputs.version }}
           crate: palette
-          dependencies: '{"palette_derive": "${{ github.event.inputs.version }}"}'
+          dependencies: '{"palette_derive": "${{ github.event.inputs.version }}","palette_math": "${{ github.event.inputs.version }}"}'
       - name: Increment version in README.md
         run: 'sed -i ''s/\[Released\](https:\/\/docs.rs\/palette\/.*\/palette\/)/[Released](https:\/\/docs.rs\/palette\/${{ github.event.inputs.version }}\/palette\/)/'' README.md'
+      - name: Generate code
+        run: cargo run -p codegen
       - name: Generate release notes
         uses: ./.github/actions/generate_release_notes
         with:

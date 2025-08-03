@@ -49,6 +49,7 @@ export async function generate(octokit: OctokitPlusExtra, owner: string, repo: s
             linkedPullRequests.add(pullRequest.number);
 
             const closedIssues = pullRequest.body
+                .replace(/<!--[\s\S]*?(?:-->)/g, '')
                 .toLowerCase()
                 .match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved) #[0-9]+/g)
                 ?.map((closedIssue) => {
