@@ -66,11 +66,11 @@ fn build_u8_to_float_lut(entry: &LutEntryU8) -> TokenStream {
     let table_f32_ty = quote! {palette_math::lut::Lut<u8, f32, palette_math::lut::ArrayTable<256>>};
 
     quote! {
-        pub(crate) const #table_ident: #table_ty = palette_math::lut::Lut::new([
+        pub(crate) static #table_ident: #table_ty = palette_math::lut::Lut::new([
             #(#table),*
         ]);
 
-        pub(crate) const #table_f32_ident: #table_f32_ty = palette_math::lut::Lut::new([
+        pub(crate) static #table_f32_ident: #table_f32_ty = palette_math::lut::Lut::new([
             #(#table_f32),*
         ]);
     }
@@ -92,7 +92,7 @@ fn build_float_to_u8_lut(entry: &LutEntryU8) -> TokenStream {
     let table_ty = quote! {palette_math::gamma::lut::GammaLut<f32, u8, palette_math::lut::ArrayTable<#table_size_usize>>};
     quote! {
         // SAFETY: Generated from a builder for the transfer function's gamma curve.
-        pub const #table_ident: #table_ty = unsafe { palette_math::gamma::lut::GammaLut::from_parts(
+        pub static #table_ident: #table_ty = unsafe { palette_math::gamma::lut::GammaLut::from_parts(
             #min_float_bits,
             #linear_slope,
             [

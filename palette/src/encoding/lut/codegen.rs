@@ -3,7 +3,7 @@
 // Run `cargo run -p codegen` from the project root to regenerate it.
 
 pub mod srgb {
-    pub(crate) const SRGB_U8_TO_F64: palette_math::lut::Lut<
+    pub(crate) static SRGB_U8_TO_F64: palette_math::lut::Lut<
         u8,
         f64,
         palette_math::lut::ArrayTable<256>,
@@ -265,7 +265,7 @@ pub mod srgb {
         0.991102096850078f64,
         1f64,
     ]);
-    pub(crate) const SRGB_U8_TO_F32: palette_math::lut::Lut<
+    pub(crate) static SRGB_U8_TO_F32: palette_math::lut::Lut<
         u8,
         f32,
         palette_math::lut::ArrayTable<256>,
@@ -527,7 +527,7 @@ pub mod srgb {
         0.9911021f32,
         1f32,
     ]);
-    pub const SRGB_F32_TO_U8: palette_math::gamma::lut::GammaLut<
+    pub static SRGB_F32_TO_U8: palette_math::gamma::lut::GammaLut<
         f32,
         u8,
         palette_math::lut::ArrayTable<104usize>,
@@ -646,7 +646,7 @@ pub mod srgb {
 }
 
 pub mod rec_standards {
-    pub(crate) const REC_OETF_U8_TO_F64: palette_math::lut::Lut<
+    pub(crate) static REC_OETF_U8_TO_F64: palette_math::lut::Lut<
         u8,
         f64,
         palette_math::lut::ArrayTable<256>,
@@ -908,7 +908,7 @@ pub mod rec_standards {
         0.9920898491044691f64,
         1f64,
     ]);
-    pub(crate) const REC_OETF_U8_TO_F32: palette_math::lut::Lut<
+    pub(crate) static REC_OETF_U8_TO_F32: palette_math::lut::Lut<
         u8,
         f32,
         palette_math::lut::ArrayTable<256>,
@@ -1170,7 +1170,7 @@ pub mod rec_standards {
         0.99208987f32,
         1f32,
     ]);
-    pub const REC_OETF_F32_TO_U8: palette_math::gamma::lut::GammaLut<
+    pub static REC_OETF_F32_TO_U8: palette_math::gamma::lut::GammaLut<
         f32,
         u8,
         palette_math::lut::ArrayTable<96usize>,
@@ -1281,7 +1281,7 @@ pub mod rec_standards {
 }
 
 pub mod adobe {
-    pub(crate) const ADOBE_RGB_U8_TO_F64: palette_math::lut::Lut<
+    pub(crate) static ADOBE_RGB_U8_TO_F64: palette_math::lut::Lut<
         u8,
         f64,
         palette_math::lut::ArrayTable<256>,
@@ -1543,7 +1543,7 @@ pub mod adobe {
         0.9913958869243519f64,
         1f64,
     ]);
-    pub(crate) const ADOBE_RGB_U8_TO_F32: palette_math::lut::Lut<
+    pub(crate) static ADOBE_RGB_U8_TO_F32: palette_math::lut::Lut<
         u8,
         f32,
         palette_math::lut::ArrayTable<256>,
@@ -1805,7 +1805,7 @@ pub mod adobe {
         0.9913959f32,
         1f32,
     ]);
-    pub const ADOBE_RGB_F32_TO_U8: palette_math::gamma::lut::GammaLut<
+    pub static ADOBE_RGB_F32_TO_U8: palette_math::gamma::lut::GammaLut<
         f32,
         u8,
         palette_math::lut::ArrayTable<160usize>,
@@ -1980,7 +1980,7 @@ pub mod adobe {
 }
 
 pub mod p3 {
-    pub(crate) const P3_GAMMA_U8_TO_F64: palette_math::lut::Lut<
+    pub(crate) static P3_GAMMA_U8_TO_F64: palette_math::lut::Lut<
         u8,
         f64,
         palette_math::lut::ArrayTable<256>,
@@ -2242,7 +2242,7 @@ pub mod p3 {
         0.9898358841674278f64,
         1f64,
     ]);
-    pub(crate) const P3_GAMMA_U8_TO_F32: palette_math::lut::Lut<
+    pub(crate) static P3_GAMMA_U8_TO_F32: palette_math::lut::Lut<
         u8,
         f32,
         palette_math::lut::ArrayTable<256>,
@@ -2504,7 +2504,7 @@ pub mod p3 {
         0.98983586f32,
         1f32,
     ]);
-    pub const P3_GAMMA_F32_TO_U8: palette_math::gamma::lut::GammaLut<
+    pub static P3_GAMMA_F32_TO_U8: palette_math::gamma::lut::GammaLut<
         f32,
         u8,
         palette_math::lut::ArrayTable<192usize>,
