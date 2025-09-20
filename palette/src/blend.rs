@@ -37,7 +37,7 @@
 use crate::{
     cast::{self, ArrayCast},
     clamp,
-    num::{Arithmetics, Clamp, One, Real, Zero},
+    num::{Arithmetics, Clamp, One, Zero},
     stimulus::Stimulus,
 };
 
@@ -83,7 +83,7 @@ where
 /// Alpha masking and unmasking.
 pub trait Premultiply: Sized {
     /// The color's component type.
-    type Scalar: Real + Stimulus;
+    type Scalar: Stimulus;
 
     /// Alpha mask the color.
     ///
