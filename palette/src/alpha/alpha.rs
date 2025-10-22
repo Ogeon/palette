@@ -35,7 +35,7 @@ use crate::{
 /// so on, Palette uses this wrapper type to attach the alpha component. The
 /// memory representation is the same as if `alpha` was the last member/property
 /// of `color`, which is just as space efficient. The perk of having a wrapper
-/// is that the alpha can easily be added to or separated form any color.
+/// is that the alpha can easily be added to or separated from any color.
 ///
 /// # Creating Transparent Values
 ///
