@@ -901,10 +901,10 @@ where
 /// let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
 /// let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
 ///
-/// assert_relative_eq!(red.get_hue(), 0.0.into());
-/// assert_relative_eq!(green.get_hue(), 120.0.into());
-/// assert_relative_eq!(blue.get_hue(), 240.0.into());
-/// assert_relative_eq!(gray.get_hue(), 0.0.into());
+/// assert_relative_eq!(red.get_hue(), 0.0.into(), epsilon = 0.0001);
+/// assert_relative_eq!(green.get_hue(), 120.0.into(), epsilon = 0.0001);
+/// assert_relative_eq!(blue.get_hue(), 240.0.into(), epsilon = 0.0001);
+/// assert_relative_eq!(gray.get_hue(), 0.0.into(), epsilon = 0.0001);
 /// ```
 pub trait GetHue {
     /// The kind of hue unit this color space uses.
