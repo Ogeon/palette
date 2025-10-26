@@ -901,10 +901,10 @@
 <a href=#901 id=901 data-nosnippet>901</a>/// let blue = LinSrgb::new(0.0f32, 0.0, 1.0);
 <a href=#902 id=902 data-nosnippet>902</a>/// let gray = LinSrgb::new(0.5f32, 0.5, 0.5);
 <a href=#903 id=903 data-nosnippet>903</a>///
-<a href=#904 id=904 data-nosnippet>904</a>/// assert_relative_eq!(red.get_hue(), 0.0.into());
-<a href=#905 id=905 data-nosnippet>905</a>/// assert_relative_eq!(green.get_hue(), 120.0.into());
-<a href=#906 id=906 data-nosnippet>906</a>/// assert_relative_eq!(blue.get_hue(), 240.0.into());
-<a href=#907 id=907 data-nosnippet>907</a>/// assert_relative_eq!(gray.get_hue(), 0.0.into());
+<a href=#904 id=904 data-nosnippet>904</a>/// assert_relative_eq!(red.get_hue(), 0.0.into(), epsilon = 0.0001);
+<a href=#905 id=905 data-nosnippet>905</a>/// assert_relative_eq!(green.get_hue(), 120.0.into(), epsilon = 0.0001);
+<a href=#906 id=906 data-nosnippet>906</a>/// assert_relative_eq!(blue.get_hue(), 240.0.into(), epsilon = 0.0001);
+<a href=#907 id=907 data-nosnippet>907</a>/// assert_relative_eq!(gray.get_hue(), 0.0.into(), epsilon = 0.0001);
 <a href=#908 id=908 data-nosnippet>908</a>/// ```
 <a href=#909 id=909 data-nosnippet>909</a></span><span class="kw">pub trait </span>GetHue {
 <a href=#910 id=910 data-nosnippet>910</a>    <span class="doccomment">/// The kind of hue unit this color space uses.

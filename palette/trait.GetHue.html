@@ -14,10 +14,10 @@
 <span class="kw">let </span>blue = LinSrgb::new(<span class="number">0.0f32</span>, <span class="number">0.0</span>, <span class="number">1.0</span>);
 <span class="kw">let </span>gray = LinSrgb::new(<span class="number">0.5f32</span>, <span class="number">0.5</span>, <span class="number">0.5</span>);
 
-<span class="macro">assert_relative_eq!</span>(red.get_hue(), <span class="number">0.0</span>.into());
-<span class="macro">assert_relative_eq!</span>(green.get_hue(), <span class="number">120.0</span>.into());
-<span class="macro">assert_relative_eq!</span>(blue.get_hue(), <span class="number">240.0</span>.into());
-<span class="macro">assert_relative_eq!</span>(gray.get_hue(), <span class="number">0.0</span>.into());</code></pre></div>
+<span class="macro">assert_relative_eq!</span>(red.get_hue(), <span class="number">0.0</span>.into(), epsilon = <span class="number">0.0001</span>);
+<span class="macro">assert_relative_eq!</span>(green.get_hue(), <span class="number">120.0</span>.into(), epsilon = <span class="number">0.0001</span>);
+<span class="macro">assert_relative_eq!</span>(blue.get_hue(), <span class="number">240.0</span>.into(), epsilon = <span class="number">0.0001</span>);
+<span class="macro">assert_relative_eq!</span>(gray.get_hue(), <span class="number">0.0</span>.into(), epsilon = <span class="number">0.0001</span>);</code></pre></div>
 </div></details><h2 id="required-associated-types" class="section-header">Required Associated Types<a href="#required-associated-types" class="anchor">§</a></h2><div class="methods"><details class="toggle" open><summary><section id="associatedtype.Hue" class="method"><a class="src rightside" href="../src/palette/lib.rs.html#916">Source</a><h4 class="code-header">type <a href="#associatedtype.Hue" class="associatedtype">Hue</a></h4></section></summary><div class="docblock"><p>The kind of hue unit this color space uses.</p>
 <p>The hue is most commonly calculated as an angle around a color circle
 and may not always be uniform between color spaces. It’s therefore not
