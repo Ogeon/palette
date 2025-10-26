@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 edition = "2021"
 resolver = "2"
 categories = ["graphics", "multimedia::images", "no-std"]
-rust-version = "1.61.0"
+rust-version = "1.68.0"
 
 [features]
 default=["std"]

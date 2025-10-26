@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["palette", "derive", "macros"]
 license = "MIT OR Apache-2.0"
 edition = "2021"
-rust-version = "1.61.0"
+rust-version = "1.68.0"
 
 [lib]
 proc-macro = true
