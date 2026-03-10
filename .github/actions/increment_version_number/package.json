@@ -15,7 +15,7 @@
     "@actions/io": "^1.1.1",
     "@iarna/toml": "^2.2.5",
     "@toml-tools/lexer": "^1.0.0",
-    "chevrotain": "^11.0.3",
+    "chevrotain": "^11.2.0",
     "semver": "^7.5.2"
   },
   "devDependencies": {
