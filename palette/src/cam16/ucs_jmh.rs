@@ -351,7 +351,7 @@ mod test {
         assert_relative_eq!(
             lhs1.delta_e(rhs1),
             lhs2.delta_e(rhs2),
-            epsilon = 0.0000000000001
+            epsilon = 0.000000000001
         );
     }
 

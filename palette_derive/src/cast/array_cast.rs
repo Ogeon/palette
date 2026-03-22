@@ -162,7 +162,7 @@ fn is_allowed_repr(attributes: &[Attribute]) -> std::result::Result<bool, Vec<sy
                 item.require_path_only()
                     .ok()
                     .and_then(Path::get_ident)
-                    .map_or(false, |ident| ident == "C" || ident == "transparent")
+                    .is_some_and(|ident| ident == "C" || ident == "transparent")
             });
 
             if contains_allowed_repr {
