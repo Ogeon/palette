@@ -23,7 +23,7 @@ keywords = ["color", "conversion", "linear", "pixel", "rgb"]
 license = "MIT OR Apache-2.0"
 edition = "2021"
 categories = ["graphics", "multimedia::images", "no-std"]
-rust-version = "1.68.0"
+rust-version = "1.71.0"
 
 [features]
 default = ["named_from_str", "std", "approx"]
