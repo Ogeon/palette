@@ -7,6 +7,8 @@ use crate::{
 
 #[cfg(feature = "wide")]
 mod wide;
+#[cfg(feature = "wide_1")]
+mod wide_1;
 
 /// Represents types that can express half of a rotation (i.e. 180 degrees).
 pub trait HalfRotation {

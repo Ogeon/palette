@@ -7,6 +7,8 @@ use core::ops::{BitAnd, BitOr, BitXor, Not};
 
 #[cfg(feature = "wide")]
 mod wide;
+#[cfg(feature = "wide_1")]
+mod wide_1;
 
 /// Associates a Boolean type to the implementing type.
 ///

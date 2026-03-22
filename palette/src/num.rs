@@ -20,6 +20,8 @@ use crate::bool_mask::HasBoolMask;
 mod libm;
 #[cfg(feature = "wide")]
 mod wide;
+#[cfg(feature = "wide_1")]
+mod wide_1;
 
 pub use palette_math::num::{One, Powf, Powi, Powu, Recip};
 

@@ -30,7 +30,7 @@ codspeed-criterion-compat = "2.1.0"
 criterion = { version = "0.5.1", default-features = false }
 csv = "1"
 lazy_static = "1"
-palette = { path = "../palette", features = ["wide"] }
+palette = { path = "../palette", features = ["wide_1"] }
 serde = "1"
 serde_derive = "1"
-wide = "0.7.3"
+wide = "1.2.0"

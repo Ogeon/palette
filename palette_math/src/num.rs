@@ -18,6 +18,8 @@ use core::ops::Mul;
 mod libm;
 #[cfg(feature = "wide")]
 mod wide;
+#[cfg(feature = "wide_1")]
+mod wide_1;
 
 /// Methods for the value `1`.
 pub trait One {

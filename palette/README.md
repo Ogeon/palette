@@ -52,12 +52,13 @@ These features are disabled by default:
 * `"random"` - Enables generating random colors using [`rand`].
 * `"libm"` - Uses the [`libm`] floating point math library (for when the `std` feature is disabled).
 * `"bytemuck"` - Enables casting between plain data types using [`bytemuck`].
-* `"wide"` - Enables support for using SIMD types from [`wide`].
+* `"wide_1"` - Enables support for using SIMD types from [`wide`] 1.X.Y.
 * `"find-crate"` - Enables derives to find the `palette` crate when it's renamed in `Cargo.toml`.
 
 These features have been deprecated:
 
 * `"named_from_str"` - Alias for `"named"`, still enabled by default. <strike>Enables `named::from_str`, which maps name strings to colors.</strike>
+* `"wide"` - Enables support for using SIMD types from [`wide`] 0.7.X.
 
 ### Using palette in an embedded environment
 

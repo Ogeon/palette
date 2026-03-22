@@ -34,7 +34,11 @@ These features are enabled by default:
 These features are disabled by default:
 
 * `"libm"` - Uses the [`libm`](https://crates.io/crates/libm) floating point math library (for when the `std` feature is disabled).
-* `"wide"` - Enables support for using SIMD types from [`wide`](https://crates.io/crates/wide).
+* `"wide_1"` - Enables support for using SIMD types from [`wide`](https://crates.io/crates/wide) 1.X.Y.
+
+These features have been deprecated:
+
+* `"wide"` - Enables support for using SIMD types from [`wide`](https://crates.io/crates/wide) 0.7.X.
 
 ### Embedded And `#![no_std]`
 

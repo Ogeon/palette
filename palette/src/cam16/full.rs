@@ -649,7 +649,7 @@ mod test {
         );
     }
 
-    #[cfg(feature = "wide")]
+    #[cfg(feature = "wide_1")]
     #[test]
     fn simd() {
         let white_srgb = Srgb::from(0xffffff).into_format();
@@ -692,7 +692,7 @@ mod test {
             saturation: 87.47645277637828,
         };
 
-        let srgb = Srgb::<wide::f64x4>::from([white_srgb, red_srgb, green_srgb, blue_srgb]);
+        let srgb = Srgb::<wide_1::f64x4>::from([white_srgb, red_srgb, green_srgb, blue_srgb]);
         let xyz = srgb.into_linear().into_color_unclamped();
         let mut cam16 = Cam16::from_xyz(xyz, Parameters::TEST_DEFAULTS);
         cam16.hue = cam16.hue.into_positive_degrees().into();

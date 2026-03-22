@@ -20,7 +20,9 @@ std = ["alloc"]
 alloc = []
 libm = ["dep:libm"]
 wide = ["dep:wide"]
+wide_1 = ["dep:wide_1"]
 
 [dependencies]
 libm = { version = "0.2.1", default-features = false, optional = true }
 wide = { version = "0.7.3", default-features = false, optional = true }
+wide_1 = { package = "wide", version = "1.2.0", default-features = false, optional = true }
