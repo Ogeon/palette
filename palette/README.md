@@ -41,7 +41,8 @@ features = ["libm"] # Uses libm instead of std for floating point math
 
 These features are enabled by default:
 
-* `"named"` - Enables color constants, located in the `named` module.
+* `"named"` - Enables color constants, located in the
+  [`named`](https://docs.rs/palette/latest/palette/named/index.html) module.
 * `"std"` - Enables use of the standard library. Also enables `"alloc"`.
 * `"alloc"` - Enables implementations for allocating types, such as `Vec` or `Box`.
 * `"approx"` - Enables approximate comparison using [`approx`].

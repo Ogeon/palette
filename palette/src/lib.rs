@@ -2,6 +2,61 @@
 //! accessible for anyone. It uses the type system to enforce correctness and to
 //! avoid mistakes, such as mixing incompatible color types.
 //!
+//! # Getting Started
+//!
+//! Add the following lines to your `Cargo.toml` file:
+//!
+//! ```toml
+//! [dependencies]
+//! palette = "0.7.6"
+//! ```
+//!
+//! or these lines if you want to opt out of `std`:
+//!
+//! ```toml
+//! [dependencies.palette]
+//! version = "0.7.6"
+//! default-features = false
+//! features = ["libm"] # Uses libm instead of std for floating point math
+//! ```
+//!
+//! ## Cargo Features
+//!
+//! These features are enabled by default:
+//!
+//! * `"named"` - Enables color constants, located in the [`named`] module.
+//! * `"std"` - Enables use of the standard library. Also enables `"alloc"`.
+//! * `"alloc"` - Enables implementations for allocating types, such as `Vec`
+//!   or `Box`.
+//! * `"approx"` - Enables approximate comparison using [`approx`].
+//!
+//! These features are disabled by default:
+//!
+//! * `"serializing"` - Enables color serializing and deserializing using
+//!   [`serde`].
+//! * `"random"` - Enables generating random colors using [`rand`].
+//! * `"libm"` - Uses the [`libm`] floating point math library (for when the
+//!   `std` feature is disabled).
+//! * `"bytemuck"` - Enables casting between plain data types using
+//!   [`bytemuck`].
+//! * `"wide"` - Enables support for using SIMD types from [`wide`].
+//! * `"find-crate"` - Enables derives to find the `palette` crate when it's
+//!   renamed in `Cargo.toml`.
+//!
+//! These features have been deprecated:
+//!
+//! * `"named_from_str"` - Alias for `"named"`, still enabled by default.
+//!   <strike>Enables `named::from_str`, which maps name strings to
+//!   colors.</strike>
+//!
+//! ## Using palette in an embedded environment
+//!
+//! Palette supports `#![no_std]` environments by disabling the `"std"`
+//! feature. It uses [`libm`], via the `"libm"` feature, to provide the
+//! floating-point operations that are typically in `std`, and the `"alloc"`
+//! feature to provide features that use allocating types. However, serializing
+//! with `serde` is not available without the standard library.
+//!
 //! # Where Do I Start?
 //!
 //! The sections below give an overview of how the types in this library work,
