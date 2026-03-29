@@ -1,10 +1,12 @@
 {
     "compilerOptions": {
+        "rootDir": "./src",
         "strict": true,
         "alwaysStrict": true,
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "module": "CommonJS",
         "target": "ES2019",
+        "types": ["node"]
     },
     "compileOnSave": true
 }

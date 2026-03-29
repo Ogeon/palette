@@ -10,9 +10,9 @@
     "build": "ncc build src/index.ts -m -o dist && ncc build src/run_local.ts -m -o local"
   },
   "dependencies": {
-    "@actions/core": "^1.9.1",
-    "@actions/exec": "^1.1.0",
-    "@actions/io": "^1.1.1",
+    "@actions/core": "^2.0.0",
+    "@actions/exec": "^2.0.0",
+    "@actions/io": "^2.0.0",
     "@iarna/toml": "^2.2.5",
     "@toml-tools/lexer": "^1.0.0",
     "chevrotain": "^11.2.0",
@@ -20,9 +20,9 @@
   },
   "devDependencies": {
     "@types/iarna__toml": "^2.0.2",
-    "@types/node": "^20.11.0",
+    "@types/node": "^25.5.0",
     "@types/semver": "^7.3.6",
     "@vercel/ncc": "^0.38.1",
-    "typescript": "~5.3.3"
+    "typescript": "~6.0.2"
   }
 }
