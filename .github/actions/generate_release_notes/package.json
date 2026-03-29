@@ -10,17 +10,17 @@
     "build": "ncc build src/index.ts -m -o dist && ncc build src/run_local.ts -m -o local"
   },
   "dependencies": {
-    "@actions/core": "^1.9.1",
-    "@actions/github": "^6.0.0",
-    "@octokit/core": "^5.0.2",
-    "@octokit/plugin-paginate-rest": "^9.2.2",
+    "@actions/core": "^2.0.0",
+    "@actions/github": "^8.0.0",
+    "@octokit/core": "^7.0.6",
+    "@octokit/plugin-paginate-rest": "^14.0.0",
     "semver": "^7.5.2",
     "simple-git": "^3.32.3"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
+    "@types/node": "^25.5.0",
     "@types/semver": "^7.3.6",
     "@vercel/ncc": "^0.38.1",
-    "typescript": "~5.3.3"
+    "typescript": "~6.0.2"
   }
 }
