@@ -15,7 +15,7 @@
     "@octokit/core": "^7.0.6",
     "@octokit/plugin-paginate-rest": "^14.0.0",
     "semver": "^7.5.2",
-    "simple-git": "^3.32.3"
+    "simple-git": "^3.36.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
