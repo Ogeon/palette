@@ -916,7 +916,7 @@
 <a href=#916 id=916 data-nosnippet>916</a>                <span class="kw">let </span>hue = OklabHue::from_degrees(degree);
 <a href=#917 id=917 data-nosnippet>917</a>                <span class="kw">let </span>(a, b) = hue.into_cartesian();
 <a href=#918 id=918 data-nosnippet>918</a>                <span class="kw">let </span>roundtrip_hue = OklabHue::from_cartesian(a * <span class="number">10000.0</span>, b * <span class="number">10000.0</span>);
-<a href=#919 id=919 data-nosnippet>919</a>                <span class="macro">assert_abs_diff_eq!</span>(roundtrip_hue, hue, epsilon = <span class="number">0.0000000000001</span>);
+<a href=#919 id=919 data-nosnippet>919</a>                <span class="macro">assert_abs_diff_eq!</span>(roundtrip_hue, hue, epsilon = <span class="number">0.000000000001</span>);
 <a href=#920 id=920 data-nosnippet>920</a>            }
 <a href=#921 id=921 data-nosnippet>921</a>        }
 <a href=#922 id=922 data-nosnippet>922</a>
