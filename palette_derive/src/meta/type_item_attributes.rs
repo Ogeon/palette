@@ -1,24 +1,20 @@
 use std::collections::HashSet;
 
-use by_address::ByAddress;
+use palette_codegen::util::Ref;
 use quote::quote;
 use syn::{punctuated::Punctuated, spanned::Spanned, token::Comma, Expr, ExprLit};
 use syn::{Ident, Lit, Meta, MetaNameValue, Type};
 
-use crate::color_types::{ColorGroup, COLOR_GROUPS};
+use palette_codegen::color_types::{ColorGroup, ColorMeta, COLOR_GROUPS};
 
 use super::AttributeArgumentParser;
 
 #[derive(Default)]
 pub struct TypeItemAttributes {
     pub skip_derives: HashSet<String>,
-    pub internal: bool,
-    pub internal_not_base_type: bool,
     pub component: Option<Type>,
-    pub white_point: Option<Type>,
-    pub rgb_standard: Option<Type>,
-    pub luma_standard: Option<Type>,
-    pub(crate) color_groups: HashSet<ByAddress<&'static ColorGroup>>,
+    pub color_meta: ColorMeta,
+    pub(crate) color_groups: HashSet<Ref<'static, ColorGroup>>,
 }
 
 impl AttributeArgumentParser for TypeItemAttributes {
@@ -39,7 +35,7 @@ impl AttributeArgumentParser for TypeItemAttributes {
 
                         let color_group = COLOR_GROUPS
                             .iter()
-                            .find(|group| group.check_availability(&color_name).is_ok());
+                            .find(|group| group.has_type(&color_name));
 
                         let group = if let Some(&group) = color_group {
                             group
@@ -74,33 +70,13 @@ impl AttributeArgumentParser for TypeItemAttributes {
                 get_meta_type_argument(argument, &mut self.component)?;
             }
             Some("white_point") => {
-                get_meta_type_argument(argument, &mut self.white_point)?;
+                get_meta_type_argument(argument, &mut self.color_meta.white_point)?;
             }
             Some("rgb_standard") => {
-                get_meta_type_argument(argument, &mut self.rgb_standard)?;
+                get_meta_type_argument(argument, &mut self.color_meta.rgb_standard)?;
             }
             Some("luma_standard") => {
-                get_meta_type_argument(argument, &mut self.luma_standard)?;
-            }
-            Some("palette_internal") => {
-                if let Meta::Path(_) = argument {
-                    self.internal = true;
-                } else {
-                    return Err(vec![syn::Error::new(
-                        argument.span(),
-                        "expected `palette_internal` to a literal without value",
-                    )]);
-                }
-            }
-            Some("palette_internal_not_base_type") => {
-                if let Meta::Path(_) = argument {
-                    self.internal_not_base_type = true;
-                } else {
-                    return Err(vec![syn::Error::new(
-                        argument.span(),
-                        "expected `palette_internal` to a literal without value",
-                    )]);
-                }
+                get_meta_type_argument(argument, &mut self.color_meta.luma_standard)?;
             }
             _ => {
                 return Err(vec![syn::Error::new(

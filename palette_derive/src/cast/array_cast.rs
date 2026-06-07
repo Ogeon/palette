@@ -1,3 +1,4 @@
+use palette_codegen::util::IdentOrIndex;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 
@@ -6,7 +7,7 @@ use syn::{
     punctuated::Punctuated, token::Comma, Attribute, Data, DeriveInput, Fields, Meta, Path, Type,
 };
 
-use crate::meta::{self, FieldAttributes, IdentOrIndex, TypeItemAttributes};
+use crate::meta::{self, FieldAttributes};
 use crate::util;
 
 pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::Error>> {
@@ -19,7 +20,6 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
     } = syn::parse(tokens).map_err(|error| vec![error])?;
 
     let allowed_repr = is_allowed_repr(&attrs)?;
-    let (item_meta, item_errors) = meta::parse_namespaced_attributes::<TypeItemAttributes>(attrs);
 
     let mut number_of_channels = 0usize;
     let mut field_type: Option<Type> = None;
@@ -96,17 +96,18 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
         ));
     }
 
-    let array_cast_trait_path = util::path(["cast", "ArrayCast"], item_meta.internal);
-
     let mut implementation = if let Some(field_type) = field_type {
-        let (impl_generics, type_generics, where_clause) = generics.split_for_impl();
+        let palette_name = util::find_crate_name();
 
-        quote! {
-            #[automatically_derived]
-            unsafe impl #impl_generics #array_cast_trait_path for #ident #type_generics #where_clause {
-                type Array = [#field_type; #number_of_channels];
-            }
-        }
+        let mut struct_info =
+            palette_codegen::array_cast::StructInfo::new(ident, field_type, number_of_channels);
+        struct_info.generics = generics;
+
+        // SAFETY: The invariants of `ArrayCast` are checked by this derive macro:
+        // * Only structs with at least one field are allowed
+        // * Must be `repr(C)` or `repr(transparent)`
+        // * All fields must have the same type, which becomes the array item type
+        unsafe { palette_codegen::array_cast::derive(&struct_info, &palette_name) }
     } else {
         errors.push(syn::Error::new(
             Span::call_site(),
@@ -118,15 +119,11 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
 
     implementation.extend(errors.iter().map(syn::Error::to_compile_error));
 
-    let item_errors = item_errors
-        .into_iter()
-        .map(|error| error.into_compile_error());
     let field_errors = field_errors
         .into_iter()
         .map(|error| error.into_compile_error());
 
     Ok(quote! {
-        #(#item_errors)*
         #(#field_errors)*
 
         #implementation

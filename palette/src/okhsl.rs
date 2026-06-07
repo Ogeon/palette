@@ -8,7 +8,6 @@ use crate::{
     num::{Arithmetics, Cbrt, Hypot, IsValidDivisor, MinMax, One, Powi, Real, Sqrt, Zero},
     ok_utils::{toe, ChromaValues},
     stimulus::{FromStimulus, Stimulus},
-    white_point::D65,
     GetHue, HasBoolMask, LinSrgb, Oklab, OklabHue,
 };
 
@@ -18,6 +17,9 @@ pub use self::properties::Iter;
 pub use self::random::UniformOkhsl;
 
 mod alpha;
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 mod properties;
 #[cfg(feature = "random")]
 mod random;
@@ -32,14 +34,8 @@ mod visual_eq;
 /// * changing lightness/chroma/saturation, while keeping perceived hue constant
 /// * changing the perceived saturation (more or less) proportionally with the numerical
 ///   amount of change (unlike HSLuv)
-#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "D65",
-    component = "T",
-    skip_derives(Oklab)
-)]
 #[repr(C)]
 pub struct Okhsl<T = f32> {
     /// The hue of the color, in degrees of a circle.
@@ -51,7 +47,6 @@ pub struct Okhsl<T = f32> {
     /// * 240° to a kind of blue (RBG #00aefe).
     ///
     /// For s == 0 or v == 0, the hue is irrelevant.
-    #[palette(unsafe_same_layout_as = "T")]
     pub hue: OklabHue<T>,
 
     /// The saturation (freedom of black or white) of the color.
@@ -155,6 +150,13 @@ where
 
 impl_reference_component_methods_hue!(Okhsl, [saturation, lightness]);
 impl_struct_of_arrays_methods_hue!(Okhsl, [saturation, lightness]);
+
+impl<T> FromColorUnclamped<Okhsl<T>> for Okhsl<T> {
+    #[inline]
+    fn from_color_unclamped(val: Okhsl<T>) -> Self {
+        val
+    }
+}
 
 /// # See
 /// See [`srgb_to_okhsl`](https://bottosson.github.io/posts/colorpicker/#hsl-2)

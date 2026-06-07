@@ -1,0 +1,20 @@
+[package]
+name = "palette_codegen"
+version = "0.7.6" #automatically updated
+authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
+exclude = []
+description = "Code generation helpers for the `palette` and `palette_derice` crates."
+documentation = "https://docs.rs/palette_codegen/0.7.6/palette_codegen/"
+repository = "https://github.com/Ogeon/palette"
+readme = "README.md"
+keywords = []
+license = "MIT OR Apache-2.0"
+edition = "2021"
+resolver = "2"
+categories = []
+rust-version = "1.71.0"
+
+[dependencies]
+quote = "1.0.0"
+proc-macro2 = "1.0.0"
+syn = { version = "2.0.13", default-features = false, features = ["derive", "parsing", "printing", "clone-impls"] }

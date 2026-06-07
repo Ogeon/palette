@@ -1,5 +1,9 @@
 //! Types for the HSL color space.
 
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
+
 use core::{any::TypeId, marker::PhantomData, ops::Not};
 
 use crate::{
@@ -43,19 +47,12 @@ pub type Hsla<S = Srgb, T = f32> = Alpha<Hsl<S, T>, T>;
 ///
 /// See [HSV](crate::Hsv) for a very similar color space, with brightness
 /// instead of lightness.
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    rgb_standard = "S",
-    component = "T",
-    skip_derives(Rgb, Hsv, Hsl)
-)]
 #[repr(C)]
 pub struct Hsl<S = Srgb, T = f32> {
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
-    #[palette(unsafe_same_layout_as = "T")]
     pub hue: RgbHue<T>,
 
     /// The colorfulness of the color. 0.0 gives gray scale colors and 1.0 will
@@ -69,7 +66,6 @@ pub struct Hsl<S = Srgb, T = f32> {
     /// The white point and RGB primaries this color is adapted to. The default
     /// is the sRGB standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
 }
 

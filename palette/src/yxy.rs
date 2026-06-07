@@ -1,5 +1,9 @@
 //! Types for the CIE 1931 Yxy (xyY) color space.
 
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
+
 use core::marker::PhantomData;
 
 use crate::{
@@ -23,14 +27,8 @@ pub type Yxya<Wp = D65, T = f32> = Alpha<Yxy<Wp, T>, T>;
 /// for the color spaces are a plot of this color space's x and y coordinates.
 ///
 /// Conversions and operations on this color space depend on the white point.
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "Wp",
-    component = "T",
-    skip_derives(Xyz, Yxy, Luma)
-)]
 #[repr(C)]
 #[doc(alias = "xyY")]
 pub struct Yxy<Wp = D65, T = f32> {
@@ -50,7 +48,6 @@ pub struct Yxy<Wp = D65, T = f32> {
     /// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
 }
 

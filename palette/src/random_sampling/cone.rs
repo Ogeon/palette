@@ -120,53 +120,31 @@ where
     }
 }
 
+#[cfg(all(feature = "random", feature = "approx"))]
 #[cfg(test)]
 mod test {
-    use super::{sample_hsl, sample_hsv, HslSample, HsvSample};
+    use super::{invert_hsl_sample, sample_hsl, sample_hsv};
 
-    #[cfg(feature = "random")]
     #[test]
     fn sample_max_min() {
         let a = sample_hsv(0.0, 0.0);
         let b = sample_hsv(1.0, 1.0);
-        assert_eq!(
-            HsvSample {
-                saturation: 0.0,
-                value: 0.0
-            },
-            a
-        );
-        assert_eq!(
-            HsvSample {
-                saturation: 1.0,
-                value: 1.0
-            },
-            b
-        );
+        assert_relative_eq!(a.saturation, 0.0, epsilon = 0.000000000000001);
+        assert_relative_eq!(a.value, 0.0, epsilon = 0.000000000000001);
+        assert_relative_eq!(b.saturation, 1.0, epsilon = 0.000000000000001);
+        assert_relative_eq!(b.value, 1.0, epsilon = 0.000000000000001);
+
         let a = sample_hsl(0.0, 0.0);
         let b = sample_hsl(1.0, 1.0);
-        assert_eq!(
-            HslSample {
-                saturation: 0.0,
-                lightness: 0.0
-            },
-            a
-        );
-        assert_eq!(
-            HslSample {
-                saturation: 1.0,
-                lightness: 1.0
-            },
-            b
-        );
+        assert_relative_eq!(a.saturation, 0.0, epsilon = 0.000000000000001);
+        assert_relative_eq!(a.lightness, 0.0, epsilon = 0.000000000000001);
+        assert_relative_eq!(b.saturation, 1.0, epsilon = 0.000000000000001);
+        assert_relative_eq!(b.lightness, 1.0, epsilon = 0.000000000000001);
     }
 
-    #[cfg(all(feature = "random", feature = "approx"))]
     #[allow(clippy::excessive_precision)]
     #[test]
     fn hsl_sampling() {
-        use super::invert_hsl_sample;
-
         // Sanity check that sampling and inverting from sample are equivalent
         macro_rules! test_hsl {
             ( $x:expr, $y:expr ) => {{

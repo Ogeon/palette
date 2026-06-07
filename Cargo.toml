@@ -3,6 +3,7 @@ members = [
     "palette",
     "palette_derive",
     "palette_math",
+    "palette_codegen",
 
     # Test crates
     "integration_tests",

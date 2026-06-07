@@ -3,6 +3,9 @@
 #[allow(clippy::module_inception)]
 mod lms;
 
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 pub mod matrix;
 
 use crate::Alpha;

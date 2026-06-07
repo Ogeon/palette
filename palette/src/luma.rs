@@ -1,6 +1,9 @@
 //! Types for luma and luminance (grayscale) values.
 
 pub mod channels;
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 #[allow(clippy::module_inception)]
 mod luma;
 #[allow(deprecated)]

@@ -71,6 +71,9 @@ use crate::{
 pub use self::rgb::{FromHexError, Iter, Rgb, Rgba};
 
 pub mod channels;
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 mod hex;
 #[allow(clippy::module_inception)]
 mod rgb;

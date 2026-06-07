@@ -318,7 +318,6 @@ extern crate core;
 #[cfg_attr(test, macro_use)]
 extern crate approx;
 
-#[macro_use]
 extern crate palette_derive;
 
 #[cfg(feature = "phf")]
