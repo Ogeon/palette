@@ -39,7 +39,7 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
         Data::Enum(_) => {
             return Err(vec![syn::Error::new(
                 Span::call_site(),
-                "`ArrayCast` cannot be derived for enums, because of the discriminant",
+                "`ArrayCast` cannot be derived for enums",
             )]);
         }
         Data::Union(_) => {

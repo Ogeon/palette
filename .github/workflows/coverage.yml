@@ -25,8 +25,16 @@ jobs:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@nightly
       - uses: taiki-e/install-action@cargo-llvm-cov
+      - run: cargo install cargo-expand
       - name: Collect code coverage
-        run: cargo +nightly llvm-cov --all-features -p integration_tests -p palette -p palette_derive -p palette_codegen -p palette_math --codecov --doctests --output-path codecov.json
+        run: >
+          cargo +nightly llvm-cov --all-features --doctests --codecov --output-path codecov.json
+          -p integration_tests
+          -p derive_ui_tests
+          -p palette
+          -p palette_derive
+          -p palette_codegen
+          -p palette_math
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7
         with:

@@ -2,7 +2,7 @@
 name = "palette_derive"
 version = "0.7.7" #automatically updated
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
-exclude = []
+exclude = ["tests"]
 description = "Automatically implement traits from the palette crate."
 documentation = "https://docs.rs/palette/0.7.7/palette/"
 repository = "https://github.com/Ogeon/palette"

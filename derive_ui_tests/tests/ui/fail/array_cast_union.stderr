@@ -1,0 +1,7 @@
+error: `ArrayCast` cannot be derived for unions
+ --> tests/ui/fail/array_cast_union.rs:3:10
+  |
+3 | #[derive(ArrayCast)]
+  |          ^^^^^^^^^
+  |
+  = note: this error originates in the derive macro `ArrayCast` (in Nightly builds, run with -Z macro-backtrace for more info)
