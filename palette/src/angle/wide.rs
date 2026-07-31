@@ -48,7 +48,15 @@ macro_rules! impl_angle_wide_float {
             impl UnsignedAngle for $ty {
                 #[inline]
                 fn normalize_unsigned_angle(self) -> Self {
-                    self - (Round::floor(self / 360.0) * 360.0)
+                    use crate::{num::PartialCmp, bool_mask::Select};
+
+                    let normalized = self - (Round::floor(self / 360.0) * 360.0);
+
+                    // Check for issues with very small numbers
+                    (normalized.gt_eq(&Self::splat(0.0)) & normalized.lt(&Self::splat(360.0))).select(
+                        normalized,
+                        Self::splat(0.0)
+                    )
                 }
             }
         )+
@@ -56,3 +64,19 @@ macro_rules! impl_angle_wide_float {
 }
 
 impl_angle_wide_float!(f32x4, f32x8, f64x2, f64x4);
+
+#[cfg(test)]
+mod test {
+    use wide::f64x2;
+
+    use crate::{angle::UnsignedAngle, bool_mask::BoolMask, num::PartialCmp};
+
+    #[test]
+    fn normalize_unsigned_angle() {
+        // Regression test for https://github.com/Ogeon/palette/issues/473.
+        let hue = f64x2::new([-1e-30_f64, -5e-324_f64]);
+        let normalized = hue.normalize_unsigned_angle();
+        assert!(normalized.lt(&f64x2::splat(360.0)).is_true());
+        assert!(normalized.gt_eq(&f64x2::splat(0.0)).is_true());
+    }
+}

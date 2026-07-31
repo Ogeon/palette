@@ -131,7 +131,14 @@ macro_rules! impl_angle_float {
             impl UnsignedAngle for $ty {
                 #[inline]
                 fn normalize_unsigned_angle(self) -> Self {
-                    self - (Round::floor(self / 360.0) * 360.0)
+                    let normalized = self - (Round::floor(self / 360.0) * 360.0);
+
+                    // Check for issues with very small numbers
+                    if normalized.is_subnormal() || normalized >= 360.0 {
+                        0.0
+                    } else {
+                        normalized
+                    }
                 }
             }
         )+
@@ -204,7 +211,7 @@ impl UnsignedAngle for u8 {
 
 #[cfg(test)]
 mod test {
-    use crate::RgbHue;
+    use crate::{angle::UnsignedAngle, RgbHue};
 
     #[test]
     fn f32_to_u8() {
@@ -218,5 +225,15 @@ mod test {
         let hue_f32 = RgbHue::new(128u8);
         let hue_u8 = hue_f32.into_format::<f32>();
         assert_eq!(hue_u8, RgbHue::new(180.0f32));
+    }
+
+    #[test]
+    fn normalize_unsigned_angle() {
+        // Regression test for https://github.com/Ogeon/palette/issues/473.
+        let h1 = -1e-30_f64;
+        assert!(h1.normalize_unsigned_angle() < 360.0);
+
+        let h2 = -5e-324_f64;
+        assert!(h2.normalize_unsigned_angle() >= 0.0);
     }
 }
