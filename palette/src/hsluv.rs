@@ -315,6 +315,8 @@ mod test {
         }
     }
 
+    // Miri randomizes floats and it gets a bit too wild here due to https://github.com/Ogeon/palette/issues/475
+    #[cfg_attr(miri, ignore)]
     /// Also regression test for https://github.com/Ogeon/palette/issues/472.
     #[cfg(feature = "approx")]
     #[test]
@@ -327,7 +329,8 @@ mod test {
         assert_relative_eq!(s64.l, 100.0);
         assert_relative_eq!(s64.saturation, 0.0);
     }
-
+    // Miri randomizes floats and it gets a bit too wild here due to https://github.com/Ogeon/palette/issues/475
+    #[cfg_attr(miri, ignore)]
     #[cfg(feature = "approx")]
     #[test]
     fn black() {
