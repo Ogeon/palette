@@ -157,16 +157,25 @@ where
     T: Real + RealAngle + Into<f64> + Powi + Arithmetics + Clone,
 {
     fn from_color_unclamped(color: Lchuv<Wp, T>) -> Self {
-        // convert the chroma to a saturation based on the max
-        // saturation at a particular hue.
-        let max_chroma =
-            LuvBounds::from_lightness(color.l.clone()).max_chroma_at_hue(color.hue.clone());
+        // Reference implementation:
+        // https://github.com/hsluv/hsluv-javascript/blob/5cb736981fbad169be96f9e39ba5a90627a745a7/src/hsluv.ts#L277
 
-        Hsluv::new(
-            color.hue,
-            color.chroma / max_chroma * T::from_f64(100.0),
-            color.l,
-        )
+        // HACK: Convert to f64 to avoid breaking change. This needs to be rewritten.
+        let l_f64: f64 = color.l.clone().into();
+        let (saturation, l) = if l_f64 > 99.9999999 {
+            (T::from_f64(0.0), T::from_f64(100.0))
+        } else if l_f64 < 0.00000001 {
+            (T::from_f64(0.0), T::from_f64(0.0))
+        } else {
+            // convert the chroma to a saturation based on the max
+            // saturation at a particular hue.
+            let max_chroma =
+                LuvBounds::from_lightness(color.l.clone()).max_chroma_at_hue(color.hue.clone());
+
+            (color.chroma / max_chroma * T::from_f64(100.0), color.l)
+        };
+
+        Hsluv::new(color.hue, saturation, l)
     }
 }
 
@@ -259,6 +268,9 @@ mod test {
     use super::Hsluv;
     use crate::white_point::D65;
 
+    #[cfg(feature = "approx")]
+    use crate::{convert::IntoColorUnclamped, Srgb};
+
     test_convert_into_from_xyz!(Hsluv);
 
     #[cfg(feature = "approx")]
@@ -270,12 +282,18 @@ mod test {
         for hue in (0..=20).map(|x| x as f64 * 18.0) {
             for sat in (0..=20).map(|x| x as f64 * 5.0) {
                 for l in (1..=20).map(|x| x as f64 * 5.0) {
-                    let hsluv = Hsluv::<D65, _>::new(hue, sat, l);
+                    let mut hsluv = Hsluv::<D65, _>::new(hue, sat, l);
                     let lchuv = Lchuv::from_color(hsluv);
                     let mut to_hsluv = Hsluv::from_color(lchuv);
+
                     if to_hsluv.l < 1e-8 {
                         to_hsluv.hue = LuvHue::from(0.0);
                     }
+
+                    if !(0.00000001..=99.9999999).contains(&to_hsluv.l) {
+                        hsluv.saturation = 0.0;
+                    }
+
                     assert_relative_eq!(hsluv, to_hsluv, epsilon = 1e-5);
                 }
             }
@@ -295,6 +313,31 @@ mod test {
                 hue: -360.0 => 360.0
             }
         }
+    }
+
+    /// Also regression test for https://github.com/Ogeon/palette/issues/472.
+    #[cfg(feature = "approx")]
+    #[test]
+    fn white() {
+        let s32: Hsluv<D65, f32> = Srgb::new(1.0f32, 1.0, 1.0).into_color_unclamped();
+        assert_relative_eq!(s32.l, 100.0);
+        assert_relative_eq!(s32.saturation, 0.0);
+
+        let s64: Hsluv<D65, f64> = Srgb::new(1.0f64, 1.0, 1.0).into_color_unclamped();
+        assert_relative_eq!(s64.l, 100.0);
+        assert_relative_eq!(s64.saturation, 0.0);
+    }
+
+    #[cfg(feature = "approx")]
+    #[test]
+    fn black() {
+        let s32: Hsluv<D65, f32> = Srgb::new(0.0f32, 0.0, 0.0).into_color_unclamped();
+        assert_relative_eq!(s32.l, 0.0);
+        assert_relative_eq!(s32.saturation, 0.0);
+
+        let s64: Hsluv<D65, f64> = Srgb::new(0.0f64, 0.0, 0.0).into_color_unclamped();
+        assert_relative_eq!(s64.l, 0.0);
+        assert_relative_eq!(s64.saturation, 0.0);
     }
 
     /// Check that the arithmetic operations (add/sub) are all
