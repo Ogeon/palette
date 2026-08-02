@@ -1,6 +1,6 @@
 [package]
 name = "palette"
-version = "0.7.6" #automatically updated
+version = "0.7.7" #automatically updated
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
 exclude = [
     "scripts/*",
@@ -16,7 +16,7 @@ exclude = [
     "version.sh",
 ]
 description = "Convert and manage colors with a focus on correctness, flexibility and ease of use."
-documentation = "https://docs.rs/palette/0.7.6/palette/"
+documentation = "https://docs.rs/palette/0.7.7/palette/"
 repository = "https://github.com/Ogeon/palette"
 readme = "README.md"
 keywords = ["color", "conversion", "linear", "pixel", "rgb"]
@@ -43,8 +43,8 @@ named_from_str = ["named"]
 bench = false
 
 [dependencies]
-palette_derive = { version = "0.7.6", path = "../palette_derive" }
-palette_math = { version = "0.7.6", path = "../palette_math", default-features = false}
+palette_derive = { version = "0.7.7", path = "../palette_derive" }
+palette_math = { version = "0.7.7", path = "../palette_math", default-features = false}
 approx = { version = "0.5.0", default-features = false, optional = true }
 libm = { version = "0.2.1", default-features = false, optional = true }
 

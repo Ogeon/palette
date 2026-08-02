@@ -43,7 +43,7 @@
 //! feature to provide features that use allocating types.
 
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/palette_math/0.7.6/")]
+#![doc(html_root_url = "https://docs.rs/palette_math/0.7.7/")]
 #![warn(missing_docs)]
 
 #[cfg(any(feature = "std", test))]
