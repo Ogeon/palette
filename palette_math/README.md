@@ -14,14 +14,14 @@ Add the following lines to your `Cargo.toml` file:
 
 ```toml
 [dependencies]
-palette_math = "0.7.6"
+palette_math = "0.7.7"
 ```
 
 or this if you want to opt out of `std`:
 
 ```toml
 # Uses libm instead of std for floating point math:
-palette_math = { version = "0.7.6", features = ["libm"], default-features = false }
+palette_math = { version = "0.7.7", features = ["libm"], default-features = false }
 ```
 
 ### Cargo Features

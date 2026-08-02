@@ -1,10 +1,10 @@
 [package]
 name = "palette_math"
-version = "0.7.6" #automatically updated
+version = "0.7.7" #automatically updated
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
 exclude = []
 description = "The low level color math behind the more high level `palette` crate."
-documentation = "https://docs.rs/palette_math/0.7.6/palette_math/"
+documentation = "https://docs.rs/palette_math/0.7.7/palette_math/"
 repository = "https://github.com/Ogeon/palette"
 readme = "README.md"
 keywords = ["color", "conversion", "linear", "pixel", "rgb"]

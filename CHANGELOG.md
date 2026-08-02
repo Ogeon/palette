@@ -1,5 +1,26 @@
 # Changelog
 
+## Version 0.7.7 - 2026-08-02
+
+* [#476][476]: Fix `normalize_unsigned_angle` output for very small numbers. Closes [#473][473].
+* [#474][474]: Fix conversion into HSLuv when L is near or below 0, or near or above 100. Closes [#472][472].
+* [#465][465]: Document feature flags. Closes [#415][415].
+* [#462][462]: Increase MSRV to 1.71.0.
+* [#456][456]: Updates documentation of `palette::alpha` module.
+* [#437][437]: Introduce `palette_math` and refactor gamma LUT code.
+* [#427][427]: Deprecate `encoding::gamma` and its content.
+* [#416][416]: Add `FromLinear` and `IntoLinear` lookup table creation to build script.
+* [#424][424]: Add `Rgb::from_hex` and implement parsing for `u16`, `u32`, `f32`, `f64`. Closes [#420][420], [#306][306].
+* [#422][422]: Add named color iterators and remove phf macro dependency. Closes [#421][421].
+* [#413][413]: Add ProPhoto RGB standard.
+* [#412][412]: Add DCI-P3, DCI-P3+, and Display P3. Closes [#367][367].
+* [#411][411]: Add Adobe RGB.
+* [#410][410]: Add Rec. 709 and Rec. 2020.
+* [#407][407]: Rework chromatic adaptation. Closes [#244][244].
+* [#406][406]: Add conversion matrix and `Convert{Once}` traits.
+* [#405][405]: Make hue `::from_degrees` and some `palette::cast::*` functions `const fn`.
+* [#400][400]: Implement LMS. Closes [#352][352].
+
 ## Version 0.7.6 - 2024-04-28
 
 * [#390][390]: Add `From` implementations for changing `Rgb` component types between `u8`, `f32` and `f64`.
@@ -14,7 +35,7 @@
 ## Version 0.7.4 - 2024-01-28
 
 * [#373][373]: Add an "alloc" feature and make tests work with any feature combination. Closes [#366][366].
-* [#374][374]: Fix typo about max range of u8. Closes [#1234][1234], [#4321][4321].
+* [#374][374]: Fix typo about max range of u8.
 * [#369][369]: Fix potential `NaN` from converting to `Okhsl` when the input is white or black. Closes [#368][368].
 * [#355][355]: Add traits for delta E and the improved formulas from Huang et al.
 * [#351][351]: Improve some documentation for beginners.
@@ -23,7 +44,7 @@
 ## Version 0.7.3 - 2023-08-10
 
 * [#345][345]: Add `ArraysAs`, `AsArrays`, and corresponding traits for components and uints.
-* [#344][344]: Fix Oklab from Oklch hue conversion. Closes [#1234][1234], [#4321][4321].
+* [#344][344]: Fix Oklab from Oklch hue conversion.
 * [#343][343]: Spelling fixes.
 * [#338][338]: Add traits for casting collections of colors to and from other data types.
 
@@ -49,7 +70,7 @@
 * [#302][302]: Lift linearity restriction for `Rgb` and `Luma` and update docs.
 * [#301][301]: Remove the `Gradient` type and its module. Closes [#152][152], [#156][156].
 * [#282][282]: Add `Okhsv`, `Okhsl` and `Okhwb`.
-* [#297][297]: Expose doc comment for `Rgb::from_str`. Closes [#1234][1234], [#4321][4321].
+* [#297][297]: Expose doc comment for `Rgb::from_str`.
 * [#286][286]: Reduce the minimum compile time a bit.
 * [#279][279]: Split the `TransferFn` trait and add lookup tables for sRGB. Closes [#126][126], [#245][245].
 * [#278][278]: Implement SIMD support and add `wide` integration.
@@ -308,6 +329,24 @@ The first published version.
 [384]: https://github.com/Ogeon/palette/pull/384
 [386]: https://github.com/Ogeon/palette/pull/386
 [390]: https://github.com/Ogeon/palette/pull/390
+[400]: https://github.com/Ogeon/palette/pull/400
+[405]: https://github.com/Ogeon/palette/pull/405
+[406]: https://github.com/Ogeon/palette/pull/406
+[407]: https://github.com/Ogeon/palette/pull/407
+[410]: https://github.com/Ogeon/palette/pull/410
+[411]: https://github.com/Ogeon/palette/pull/411
+[412]: https://github.com/Ogeon/palette/pull/412
+[413]: https://github.com/Ogeon/palette/pull/413
+[416]: https://github.com/Ogeon/palette/pull/416
+[422]: https://github.com/Ogeon/palette/pull/422
+[424]: https://github.com/Ogeon/palette/pull/424
+[427]: https://github.com/Ogeon/palette/pull/427
+[437]: https://github.com/Ogeon/palette/pull/437
+[456]: https://github.com/Ogeon/palette/pull/456
+[462]: https://github.com/Ogeon/palette/pull/462
+[465]: https://github.com/Ogeon/palette/pull/465
+[474]: https://github.com/Ogeon/palette/pull/474
+[476]: https://github.com/Ogeon/palette/pull/476
 [2]: https://github.com/Ogeon/palette/issues/2
 [3]: https://github.com/Ogeon/palette/issues/3
 [4]: https://github.com/Ogeon/palette/issues/4
@@ -366,16 +405,23 @@ The first published version.
 [215]: https://github.com/Ogeon/palette/issues/215
 [222]: https://github.com/Ogeon/palette/issues/222
 [243]: https://github.com/Ogeon/palette/issues/243
+[244]: https://github.com/Ogeon/palette/issues/244
 [245]: https://github.com/Ogeon/palette/issues/245
 [283]: https://github.com/Ogeon/palette/issues/283
 [288]: https://github.com/Ogeon/palette/issues/288
 [289]: https://github.com/Ogeon/palette/issues/289
 [305]: https://github.com/Ogeon/palette/issues/305
+[306]: https://github.com/Ogeon/palette/issues/306
 [318]: https://github.com/Ogeon/palette/issues/318
 [322]: https://github.com/Ogeon/palette/issues/322
 [330]: https://github.com/Ogeon/palette/issues/330
+[352]: https://github.com/Ogeon/palette/issues/352
 [366]: https://github.com/Ogeon/palette/issues/366
+[367]: https://github.com/Ogeon/palette/issues/367
 [368]: https://github.com/Ogeon/palette/issues/368
 [385]: https://github.com/Ogeon/palette/issues/385
-[1234]: https://github.com/Ogeon/palette/issues/1234
-[4321]: https://github.com/Ogeon/palette/issues/4321
+[415]: https://github.com/Ogeon/palette/issues/415
+[420]: https://github.com/Ogeon/palette/issues/420
+[421]: https://github.com/Ogeon/palette/issues/421
+[472]: https://github.com/Ogeon/palette/issues/472
+[473]: https://github.com/Ogeon/palette/issues/473
