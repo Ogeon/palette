@@ -167,16 +167,25 @@ where
     T: Real + RealAngle + Into<f64> + Powi + Mul<Output = T> + Clone,
 {
     fn from_color_unclamped(color: Hsluv<Wp, T>) -> Self {
-        // Apply the given saturation as a percentage of the max
-        // chroma for that hue.
-        let max_chroma =
-            LuvBounds::from_lightness(color.l.clone()).max_chroma_at_hue(color.hue.clone());
+        // Reference implementation:
+        // https://github.com/hsluv/hsluv-javascript/blob/5cb736981fbad169be96f9e39ba5a90627a745a7/src/hsluv.ts#L261
 
-        Lchuv::new(
-            color.l,
-            color.saturation * max_chroma * T::from_f64(0.01),
-            color.hue,
-        )
+        // HACK: Convert to f64 to avoid breaking change. This needs to be rewritten.
+        let l_f64: f64 = color.l.clone().into();
+        let (l, chroma) = if l_f64 > 99.9999999 {
+            (T::from_f64(100.0), T::from_f64(0.0))
+        } else if l_f64 < 0.00000001 {
+            (T::from_f64(0.0), T::from_f64(0.0))
+        } else {
+            // Apply the given saturation as a percentage of the max
+            // chroma for that hue.
+            let max_chroma =
+                LuvBounds::from_lightness(color.l.clone()).max_chroma_at_hue(color.hue.clone());
+
+            (color.l, color.saturation * max_chroma * T::from_f64(0.01))
+        };
+
+        Lchuv::new(l, chroma, color.hue)
     }
 }
 
@@ -284,6 +293,58 @@ mod test {
             }
             unclamped {
                 hue: -360.0 => 360.0
+            }
+        }
+    }
+
+    /// The reference implementation short circuits to black and white outside
+    /// `0.00000001..=99.9999999`, where the in-gamut region collapses to a
+    /// point and there is no chroma left to scale the saturation by.
+    #[cfg_attr(miri, ignore)]
+    #[test]
+    fn hsluv_lightness_limits() {
+        use crate::{convert::FromColorUnclamped, Hsluv};
+
+        for hue in (0..=72).map(|x| x as f64 * 5.0) {
+            for sat in [0.0, 1e-6, 1.0, 50.0, 99.0, 100.0] {
+                for (l, expected_l) in [
+                    (-50.0, 0.0),
+                    (-1e-9, 0.0),
+                    (0.0, 0.0),
+                    (1e-9, 0.0),
+                    (99.99999991, 100.0),
+                    (100.0, 100.0),
+                    (150.0, 100.0),
+                ] {
+                    let lchuv = Lchuv::<D65, f64>::from_color_unclamped(Hsluv::new(hue, sat, l));
+
+                    assert_eq!(
+                        (lchuv.l, lchuv.chroma),
+                        (expected_l, 0.0),
+                        "hue: {hue}, saturation: {sat}, l: {l}"
+                    );
+                }
+            }
+        }
+    }
+
+    /// Inside the limits the chroma has to stay finite and in range, and a
+    /// fully saturated color still has some chroma left, no matter the hue.
+    #[cfg_attr(miri, ignore)]
+    #[test]
+    fn hsluv_chroma_within_limits() {
+        use crate::{convert::FromColorUnclamped, Hsluv};
+
+        for hue in (0..=720).map(|x| x as f64 * 0.5) {
+            for l in [1e-8, 1e-6, 0.001, 1.0, 8.0, 50.0, 99.0, 99.9999999] {
+                let lchuv = Lchuv::<D65, f64>::from_color_unclamped(Hsluv::new(hue, 100.0, l));
+
+                assert_eq!(lchuv.l, l, "hue: {hue}, l: {l}");
+                assert!(
+                    lchuv.chroma > 0.0 && lchuv.chroma <= Lchuv::<D65, f64>::max_chroma(),
+                    "hue: {hue}, l: {l}, chroma: {}",
+                    lchuv.chroma
+                );
             }
         }
     }
