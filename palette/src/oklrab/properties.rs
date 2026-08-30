@@ -2,10 +2,8 @@ use core::ops::{Add, Neg};
 
 use crate::{
     angle::RealAngle,
-    bool_mask::LazySelect,
-    num::{Arithmetics, One, PartialCmp, Real, Trigonometry, Zero},
-    white_point::D65,
-    FromColor, GetHue, OklabHue, Xyz,
+    num::{One, Trigonometry, Zero},
+    GetHue, OklabHue,
 };
 
 use super::Oklrab;
@@ -56,24 +54,6 @@ impl_simd_array_conversion!(Oklrab, [l, a, b]);
 impl_struct_of_array_traits!(Oklrab, [l, a, b]);
 
 impl_eq!(Oklrab, [l, a, b]);
-
-#[allow(deprecated)]
-impl<T> crate::RelativeContrast for Oklrab<T>
-where
-    T: Real + Arithmetics + PartialCmp,
-    T::Mask: LazySelect<T>,
-    Xyz<D65, T>: FromColor<Self>,
-{
-    type Scalar = T;
-
-    #[inline]
-    fn get_contrast_ratio(self, other: Self) -> T {
-        let xyz1 = Xyz::from_color(self);
-        let xyz2 = Xyz::from_color(other);
-
-        crate::contrast_ratio(xyz1.y, xyz2.y)
-    }
-}
 
 #[cfg(test)]
 mod test {

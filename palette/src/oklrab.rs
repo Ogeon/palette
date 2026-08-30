@@ -43,6 +43,24 @@ mod visual_eq;
 ///
 /// It assumes a D65 whitepoint and normal well-lit viewing conditions, like
 /// `Oklab`.
+///
+/// # Examples
+///
+/// Create an `Oklrab` color from its channels:
+///
+/// ```
+/// use palette::Oklrab;
+///
+/// let color = Oklrab::new(0.5f32, 0.1, -0.1);
+/// ```
+///
+/// It can also be converted from another color space:
+///
+/// ```
+/// use palette::{FromColor, Oklrab, Srgb};
+///
+/// let color = Oklrab::from_color(Srgb::new(0.8f32, 0.3, 0.1));
+/// ```
 #[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
 #[palette(
