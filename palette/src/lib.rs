@@ -370,6 +370,10 @@ pub use oklab::{Oklab, Oklaba};
 #[doc(inline)]
 pub use oklch::{Oklch, Oklcha};
 #[doc(inline)]
+pub use oklrab::{Oklrab, Oklraba};
+#[doc(inline)]
+pub use oklrch::{Oklrch, Oklrcha};
+#[doc(inline)]
 #[allow(deprecated)]
 pub use rgb::{
     AdobeRgb, AdobeRgba, GammaSrgb, GammaSrgba, LinAdobeRgb, LinAdobeRgba, LinRec2020, LinSrgb,
@@ -432,6 +436,8 @@ pub mod okhsv;
 pub mod okhwb;
 pub mod oklab;
 pub mod oklch;
+pub mod oklrab;
+pub mod oklrch;
 mod relative_contrast;
 pub mod rgb;
 pub mod stimulus;
