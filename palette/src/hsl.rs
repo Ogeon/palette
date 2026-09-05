@@ -305,10 +305,19 @@ where
             let l = sum.clone() / T::from_f64(2.0);
             if max.neq(&min).is_true() {
                 let d = max - min;
-                s = if sum.gt(&T::one()).is_true() {
-                    d.clone() / (T::from_f64(2.0) - sum)
+                let divisor = if sum.gt(&T::one()).is_true() {
+                    T::from_f64(2.0) - sum
                 } else {
-                    d.clone() / sum
+                    sum
+                };
+
+                // Added zero check for when the difference between `min` and
+                // `max` is small enough to cause rounding errors.
+                // TODO: Replace with `is_valid_divisor` (requires trait bound):
+                s = if divisor.neq(&T::zero()).is_true() {
+                    d.clone() / divisor
+                } else {
+                    T::zero()
                 };
                 h = ((sep / d) + coeff) * T::from_f64(60.0);
             };
@@ -336,10 +345,15 @@ where
             let lightness = T::from_f64(0.5) * &sum;
 
             let chroma = max.clone() - &min;
+            let divisor = sum
+                .gt(&T::one())
+                .select(T::from_f64(2.0) - &sum, sum.clone());
             let saturation = lazy_select! {
-                if min.eq(&max) => T::zero(),
-                else => chroma.clone() /
-                    sum.gt(&T::one()).select(T::from_f64(2.0) - &sum, sum.clone()),
+                // Added zero check for when the difference between `min` and
+                // `max` is small enough to cause rounding errors.
+                // TODO: Replace with `is_valid_divisor` (requires trait bound):
+                if min.eq(&max) | divisor.eq(&T::zero()) => T::zero(),
+                else => chroma.clone() / divisor,
             };
 
             // Each of these represents an RGB component. The maximum will be false
@@ -531,6 +545,8 @@ unsafe impl<S: 'static, T> bytemuck::Pod for Hsl<S, T> where T: bytemuck::Pod {}
 
 #[cfg(test)]
 mod test {
+    use crate::{convert::FromColorUnclamped, Srgb};
+
     use super::Hsl;
 
     test_convert_into_from_xyz!(Hsl);
@@ -624,6 +640,29 @@ mod test {
         super::Hsla::new(0.2, 0.3, 0.4, 0.5),
         super::Hsla::new(0.3, 0.4, 0.5, 0.6)
     );
+
+    #[test]
+    fn almost_white() {
+        // Regression test for https://github.com/Ogeon/palette/issues/482
+        let rgb = Srgb::new(1.0, 1.0, 0.99999994_f32);
+        let hsl: Hsl = Hsl::from_color_unclamped(rgb);
+        assert!(hsl.saturation.is_finite());
+    }
+
+    #[cfg(feature = "wide")]
+    #[test]
+    fn almost_white_simd() {
+        // Regression test for https://github.com/Ogeon/palette/issues/482
+        use wide::f32x4;
+
+        let rgb = Srgb::new(
+            f32x4::splat(1.0),
+            f32x4::splat(1.0),
+            f32x4::splat(0.99999994_f32),
+        );
+        let hsl = Hsl::from_color_unclamped(rgb);
+        assert!(hsl.saturation.is_finite().all());
+    }
 
     #[cfg(feature = "serializing")]
     #[test]
