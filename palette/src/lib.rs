@@ -40,8 +40,6 @@
 //! * `"bytemuck"` - Enables casting between plain data types using
 //!   [`bytemuck`].
 //! * `"wide"` - Enables support for using SIMD types from [`wide`].
-//! * `"find-crate"` - Enables derives to find the `palette` crate when it's
-//!   renamed in `Cargo.toml`.
 //!
 //! These features have been deprecated:
 //!

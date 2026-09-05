@@ -7,8 +7,7 @@ use syn::{
     punctuated::Punctuated, token::Comma, Attribute, Data, DeriveInput, Fields, Meta, Path, Type,
 };
 
-use crate::meta::{self, FieldAttributes};
-use crate::util;
+use crate::meta::{self, parse_namespaced_attributes, FieldAttributes, TypeItemAttributes};
 
 pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::Error>> {
     let DeriveInput {
@@ -20,6 +19,8 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
     } = syn::parse(tokens).map_err(|error| vec![error])?;
 
     let allowed_repr = is_allowed_repr(&attrs)?;
+    let (item_meta, item_errors) = parse_namespaced_attributes::<TypeItemAttributes>(attrs);
+    let palette_name = item_meta.get_palette_name();
 
     let mut number_of_channels = 0usize;
     let mut field_type: Option<Type> = None;
@@ -97,8 +98,6 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
     }
 
     let mut implementation = if let Some(field_type) = field_type {
-        let palette_name = util::find_crate_name();
-
         let mut struct_info =
             palette_codegen::array_cast::StructInfo::new(ident, field_type, number_of_channels);
         struct_info.generics = generics;
@@ -119,11 +118,15 @@ pub fn derive(tokens: TokenStream) -> std::result::Result<TokenStream, Vec<syn::
 
     implementation.extend(errors.iter().map(syn::Error::to_compile_error));
 
+    let item_errors = item_errors
+        .into_iter()
+        .map(|error| error.into_compile_error());
     let field_errors = field_errors
         .into_iter()
         .map(|error| error.into_compile_error());
 
     Ok(quote! {
+        #(#item_errors)*
         #(#field_errors)*
 
         #implementation

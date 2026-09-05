@@ -10,7 +10,7 @@ use syn::{parse_quote, Ident, Index, Type};
 ///
 /// `palette_name` is the name of the `palette` crate at the call site.
 /// Usually `palette` unless it's renamed in `Cargo.toml`.
-pub fn path<'a, P: AsRef<[&'a str]>>(path: P, palette_name: &Ident) -> TokenStream {
+pub(crate) fn path<'a, P: AsRef<[&'a str]>>(path: P, palette_name: &Ident) -> TokenStream {
     let path = path
         .as_ref()
         .iter()
@@ -23,7 +23,7 @@ pub fn path<'a, P: AsRef<[&'a str]>>(path: P, palette_name: &Ident) -> TokenStre
 ///
 /// `palette_name` is the name of the `palette` crate at the call site.
 /// Usually `palette` unless it's renamed in `Cargo.toml`.
-pub fn path_type(path: &[&str], palette_name: &Ident) -> Type {
+pub(crate) fn path_type(path: &[&str], palette_name: &Ident) -> Type {
     let path = path
         .iter()
         .map(|&ident| Ident::new(ident, Span::call_site()));

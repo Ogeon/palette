@@ -4,9 +4,8 @@ use proc_macro2::Span;
 use quote::quote;
 use syn::DeriveInput;
 
-use crate::{
-    meta::{parse_field_attributes, FieldAttributes},
-    util,
+use crate::meta::{
+    parse_field_attributes, parse_namespaced_attributes, FieldAttributes, TypeItemAttributes,
 };
 
 pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn::parse::Error>> {
@@ -14,10 +13,12 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
         ident,
         generics,
         data,
+        attrs,
         ..
     } = syn::parse(item).map_err(|error| vec![error])?;
 
-    let palette_name = util::find_crate_name();
+    let (item_meta, item_errors) = parse_namespaced_attributes::<TypeItemAttributes>(attrs);
+    let palette_name = item_meta.get_palette_name();
 
     let (fields_meta, field_errors) = if let syn::Data::Struct(struct_data) = data {
         parse_field_attributes::<FieldAttributes>(struct_data.fields)
@@ -34,11 +35,15 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
 
     let implementation = palette_codegen::with_alpha::derive(&struct_info, &palette_name);
 
+    let item_errors = item_errors
+        .into_iter()
+        .map(|error| error.into_compile_error());
     let field_errors = field_errors
         .into_iter()
         .map(|error| error.into_compile_error());
 
     Ok(quote! {
+        #(#item_errors)*
         #(#field_errors)*
 
         #implementation

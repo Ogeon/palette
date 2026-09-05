@@ -1,9 +1,9 @@
 [package]
 name = "palette_codegen"
-version = "0.7.6" #automatically updated
+version = "0.7.7" #automatically updated
 authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
 exclude = []
-description = "Code generation helpers for the `palette` and `palette_derice` crates."
+description = "Code generation helpers for the `palette` and `palette_derive` crates."
 documentation = "https://docs.rs/palette_codegen/0.7.6/palette_codegen/"
 repository = "https://github.com/Ogeon/palette"
 readme = "README.md"

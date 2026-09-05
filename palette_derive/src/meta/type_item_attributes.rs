@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use palette_codegen::util::Ref;
+use proc_macro2::Span;
 use quote::quote;
 use syn::{punctuated::Punctuated, spanned::Spanned, token::Comma, Expr, ExprLit};
 use syn::{Ident, Lit, Meta, MetaNameValue, Type};
@@ -11,10 +12,19 @@ use super::AttributeArgumentParser;
 
 #[derive(Default)]
 pub struct TypeItemAttributes {
+    pub palette_name: Option<Ident>,
     pub skip_derives: HashSet<String>,
     pub component: Option<Type>,
     pub color_meta: ColorMeta,
     pub(crate) color_groups: HashSet<Ref<'static, ColorGroup>>,
+}
+
+impl TypeItemAttributes {
+    pub(crate) fn get_palette_name(&self) -> Ident {
+        self.palette_name
+            .clone()
+            .unwrap_or_else(|| Ident::new("palette", Span::call_site()))
+    }
 }
 
 impl AttributeArgumentParser for TypeItemAttributes {
@@ -22,6 +32,10 @@ impl AttributeArgumentParser for TypeItemAttributes {
         let argument_name = argument.path().get_ident().map(ToString::to_string);
 
         match argument_name.as_deref() {
+            Some("crate") => {
+                assert_not_already_set(&argument, &self.palette_name)?;
+                self.palette_name = Some(get_meta_ident(argument)?);
+            }
             Some("skip_derives") => {
                 if let Meta::List(list) = argument {
                     let skipped = list
@@ -67,16 +81,20 @@ impl AttributeArgumentParser for TypeItemAttributes {
                 }
             }
             Some("component") => {
-                get_meta_type_argument(argument, &mut self.component)?;
+                assert_not_already_set(&argument, &self.component)?;
+                self.component = Some(get_meta_type(argument)?);
             }
             Some("white_point") => {
-                get_meta_type_argument(argument, &mut self.color_meta.white_point)?;
+                assert_not_already_set(&argument, &self.color_meta.white_point)?;
+                self.color_meta.white_point = Some(get_meta_type(argument)?);
             }
             Some("rgb_standard") => {
-                get_meta_type_argument(argument, &mut self.color_meta.rgb_standard)?;
+                assert_not_already_set(&argument, &self.color_meta.rgb_standard)?;
+                self.color_meta.rgb_standard = Some(get_meta_type(argument)?);
             }
             Some("luma_standard") => {
-                get_meta_type_argument(argument, &mut self.color_meta.luma_standard)?;
+                assert_not_already_set(&argument, &self.color_meta.luma_standard)?;
+                self.color_meta.luma_standard = Some(get_meta_type(argument)?);
             }
             _ => {
                 return Err(vec![syn::Error::new(
@@ -90,36 +108,54 @@ impl AttributeArgumentParser for TypeItemAttributes {
     }
 }
 
-fn get_meta_type_argument(
-    argument: Meta,
-    attribute: &mut Option<Type>,
+fn assert_not_already_set<T>(
+    argument: &Meta,
+    attribute: &Option<T>,
 ) -> Result<(), Vec<syn::Error>> {
-    if attribute.is_none() {
-        let result = if let Meta::NameValue(MetaNameValue {
-            value: Expr::Lit(ExprLit {
-                lit: Lit::Str(ty), ..
-            }),
-            ..
-        }) = argument
-        {
-            *attribute = Some(ty.parse().map_err(|error| vec![error])?);
-            Ok(())
-        } else {
-            Err((argument.span(), argument.path()))
-        };
-
-        if let Err((span, path)) = result {
-            let name = path.get_ident().unwrap();
-            let message = format!("expected `{name}` to be a type or type parameter in a string, like `{name} = \"T\"`");
-            Err(vec![syn::Error::new(span, message)])
-        } else {
-            Ok(())
-        }
-    } else {
+    if attribute.is_some() {
         let name = argument.path().get_ident().unwrap();
         Err(vec![syn::Error::new(
-            argument.span(),
+            argument.path().span(),
             format!("`{name}` appears more than once"),
         )])
+    } else {
+        Ok(())
+    }
+}
+
+fn get_meta_ident(argument: Meta) -> Result<Ident, Vec<syn::Error>> {
+    if let Meta::NameValue(MetaNameValue {
+        value: Expr::Lit(ExprLit {
+            lit: Lit::Str(name),
+            ..
+        }),
+        ..
+    }) = argument
+    {
+        name.parse().map_err(|error| vec![error])
+    } else {
+        let name = argument.path().get_ident().unwrap();
+        let message = format!(
+            r#""expected `{name}` to be an identifier in a string, like `{name} = "name_here"`"#
+        );
+        Err(vec![syn::Error::new(argument.span(), message)])
+    }
+}
+
+fn get_meta_type(argument: Meta) -> Result<Type, Vec<syn::Error>> {
+    if let Meta::NameValue(MetaNameValue {
+        value: Expr::Lit(ExprLit {
+            lit: Lit::Str(ty), ..
+        }),
+        ..
+    }) = argument
+    {
+        ty.parse().map_err(|error| vec![error])
+    } else {
+        let name = argument.path().get_ident().unwrap();
+        let message = format!(
+            "expected `{name}` to be a type or type parameter in a string, like `{name} = \"T\"`"
+        );
+        Err(vec![syn::Error::new(argument.span(), message)])
     }
 }

@@ -194,29 +194,35 @@
 //!
 //! ### Item Attributes
 //!
-//! * `skip_derives(Luma, Rgb)`: No conversion derives will be implemented for
-//!   these colors. They are instead to be implemented manually, and serve as
-//!   the basis for the automatic implementations.
+//! * `#[palette(crate = "renamed_palette"`)]`: Uses the provided name as the
+//!   crate name for `palette` in paths. This is only relevant if `palette`
+//!   has been renamed in `Cargo.toml` or should be accessed via an alias.
 //!
-//! * `white_point = "some::white_point::Type"`: Sets the white point type that
-//!   should be used when deriving. The default is `D65`, but it may be any
-//!   other type, including type parameters.
+//! * `#[palette(skip_derives(Luma, Rgb))]`: No conversion derives will be
+//!   implemented for these colors. They are instead to be implemented
+//!   manually, and serve as the basis for the automatic implementations.
 //!
-//! * `component = "some::component::Type"`: Sets the color component type that
-//!   should be used when deriving. The default is `f32`, but it may be any
-//!   other type, including type parameters.
+//! * `#[palette(white_point = "some::white_point::Type")]`: Sets the white
+//!   point type that should be used when deriving. The default is `D65`, but
+//!   it may be any other type, including type parameters.
 //!
-//! * `rgb_standard = "some::rgb_standard::Type"`: Sets the RGB standard type
-//!   that should be used when deriving. The default is to either use `Srgb` or
-//!   a best effort to convert between standards, but sometimes it has to be set
-//!   to a specific type. This also accepts type parameters.
+//! * `#[palette(component = "some::component::Type")]`: Sets the color
+//!   component type that should be used when deriving. The default is `f32`,
+//!   but it may be any other type, including type parameters.
 //!
-//! * `luma_standard = "some::rgb_standard::Type"`: Sets the Luma standard type
-//!   that should be used when deriving, similar to `rgb_standard`.
+//! * `#[palette(rgb_standard = "some::rgb_standard::Type")]`: Sets the RGB
+//!   standard type that should be used when deriving. The default is to
+//!   either use `Srgb` or a best effort to convert between standards, but
+//!   sometimes it has to be set to a specific type. This also accepts type
+//!   parameters.
+//!
+//! * `#[palette(luma_standard = "some::rgb_standard::Type")]`: Sets the Luma
+//!   standard type that should be used when deriving, similar to
+//!   `rgb_standard`.
 //!
 //! ### Field Attributes
 //!
-//! * `alpha`: Specifies field as the color's transparency value.
+//! * `#[palette(alpha)]`: Specifies field as the color's transparency value.
 //!
 //! ## Examples
 //!

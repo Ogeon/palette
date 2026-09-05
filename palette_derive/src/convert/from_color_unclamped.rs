@@ -3,11 +3,8 @@ use proc_macro2::Span;
 use quote::quote;
 use syn::{parse_quote, DeriveInput, Type};
 
-use crate::{
-    meta::{
-        parse_field_attributes, parse_namespaced_attributes, FieldAttributes, TypeItemAttributes,
-    },
-    util,
+use crate::meta::{
+    parse_field_attributes, parse_namespaced_attributes, FieldAttributes, TypeItemAttributes,
 };
 
 use palette_codegen::color_types::XYZ_COLORS;
@@ -22,7 +19,7 @@ pub fn derive(item: TokenStream) -> ::std::result::Result<TokenStream, Vec<::syn
     } = syn::parse(item).map_err(|error| vec![error])?;
 
     let (mut item_meta, item_errors) = parse_namespaced_attributes::<TypeItemAttributes>(attrs);
-    let palette_name = util::find_crate_name();
+    let palette_name = item_meta.get_palette_name();
 
     let (fields_meta, field_errors) = if let syn::Data::Struct(struct_data) = data {
         parse_field_attributes::<FieldAttributes>(struct_data.fields)
