@@ -20,7 +20,7 @@ bench = false
 find-crate = ["dep:find-crate"]
 
 [dependencies]
-syn = { version = "2.0.13", default-features = false, features = [
+syn = { version = "3.0.5", default-features = false, features = [
     "derive",
     "parsing",
     "printing",
