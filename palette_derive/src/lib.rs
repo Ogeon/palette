@@ -33,10 +33,8 @@ macro_rules! syn_try {
 
 mod alpha;
 mod cast;
-mod color_types;
 mod convert;
 mod meta;
-mod util;
 
 #[proc_macro_derive(WithAlpha, attributes(palette))]
 pub fn derive_with_alpha(tokens: TokenStream) -> TokenStream {

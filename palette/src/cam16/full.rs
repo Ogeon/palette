@@ -82,8 +82,7 @@ pub type Cam16a<T> = Alpha<Cam16<T>, T>;
 /// let ucs = Cam16UcsJmh::new(50.0f32, 80.0, 120.0);
 /// let cam16_from_ucs = Cam16Jmh::from_color(ucs).into_full(example_parameters);
 /// ```
-#[derive(Clone, Copy, Debug, WithAlpha, Default)]
-#[palette(palette_internal, component = "T")]
+#[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
 pub struct Cam16<T> {
     /// The [lightness](https://cie.co.at/eilvterm/17-22-063) (J) of the

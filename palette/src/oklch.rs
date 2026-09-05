@@ -6,7 +6,6 @@ use crate::{
     bool_mask::HasBoolMask,
     convert::FromColorUnclamped,
     num::{Hypot, One, Zero},
-    white_point::D65,
     GetHue, Oklab, OklabHue,
 };
 
@@ -16,6 +15,9 @@ pub use self::properties::Iter;
 pub use self::random::UniformOklch;
 
 mod alpha;
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 mod properties;
 #[cfg(feature = "random")]
 mod random;
@@ -30,14 +32,8 @@ mod random;
 ///
 /// It assumes a D65 whitepoint and normal well-lit viewing conditions,
 /// like Oklab.
-#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "D65",
-    component = "T",
-    skip_derives(Oklab, Oklch)
-)]
 #[repr(C)]
 pub struct Oklch<T = f32> {
     /// L is the lightness of the color. 0 gives absolute black and 1 gives the brightest white.
@@ -51,7 +47,6 @@ pub struct Oklch<T = f32> {
 
     /// h is the hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
-    #[palette(unsafe_same_layout_as = "T")]
     pub hue: OklabHue<T>,
 }
 
@@ -106,6 +101,7 @@ impl_reference_component_methods_hue!(Oklch, [l, chroma]);
 impl_struct_of_arrays_methods_hue!(Oklch, [l, chroma]);
 
 impl<T> FromColorUnclamped<Oklch<T>> for Oklch<T> {
+    #[inline]
     fn from_color_unclamped(color: Oklch<T>) -> Self {
         color
     }
@@ -116,6 +112,7 @@ where
     T: Hypot + Clone,
     Oklab<T>: GetHue<Hue = OklabHue<T>>,
 {
+    #[inline]
     fn from_color_unclamped(color: Oklab<T>) -> Self {
         let hue = color.get_hue();
         let chroma = color.get_chroma();
