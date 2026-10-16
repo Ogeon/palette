@@ -1075,13 +1075,14 @@ where
 // Safety:
 //
 // It is a requirement of `ArrayCast` that the in-memory representation of `C`
-// is made of `T`s. Because `T` is `Pod`, `Alpha<C, T>` is `Pod` as well because
-// no internal padding can be introduced during monomorphization.
+// is made of `<<C as ArrayCast>::Array as ArrayExt>::Item`s. Because that item
+// type is `Pod`, `Alpha<C, T>` is `Pod` as well when `T` matches that item type,
+// because no internal or trailing padding can be introduced during monomorphization.
 #[cfg(feature = "bytemuck")]
-unsafe impl<C, T> bytemuck::Pod for Alpha<C, T>
+unsafe impl<C> bytemuck::Pod for Alpha<C, <<C as ArrayCast>::Array as ArrayExt>::Item>
 where
-    T: bytemuck::Pod,
     C: bytemuck::Pod + ArrayCast,
+    <<C as ArrayCast>::Array as ArrayExt>::Item: bytemuck::Pod,
 {
 }
 
