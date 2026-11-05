@@ -78,7 +78,7 @@ ron = "0.8.0"
 enterpolation = "0.2.0"
 
 [dev-dependencies.image]
-version = "0.23.14"
+version = "0.25.2"
 default-features = false
 features = ["png"]
 
