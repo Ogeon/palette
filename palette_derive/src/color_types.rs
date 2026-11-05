@@ -340,6 +340,32 @@ pub(crate) static XYZ_COLORS: ColorGroup = ColorGroup {
         },
         ColorType {
             info: ColorInfo {
+                name: "Oklrab",
+                module: None,
+                default_white_point: InternalExternal {
+                    internal: Some(&["white_point", "D65"]),
+                    external: Some(&["white_point", "D65"]),
+                },
+                get_meta_type: None,
+            },
+            infer_group: true,
+            preferred_source: "Oklab",
+        },
+        ColorType {
+            info: ColorInfo {
+                name: "Oklrch",
+                module: None,
+                default_white_point: InternalExternal {
+                    internal: Some(&["white_point", "D65"]),
+                    external: Some(&["white_point", "D65"]),
+                },
+                get_meta_type: None,
+            },
+            infer_group: true,
+            preferred_source: "Oklrab",
+        },
+        ColorType {
+            info: ColorInfo {
                 name: "Okhsl",
                 module: None,
                 default_white_point: InternalExternal {

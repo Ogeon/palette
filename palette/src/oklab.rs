@@ -14,7 +14,7 @@ use crate::{
     ok_utils::{toe_inv, ChromaValues, LC, ST},
     rgb::{Rgb, RgbSpace, RgbStandard},
     white_point::D65,
-    LinSrgb, Mat3, Okhsl, Okhsv, Oklch, Xyz,
+    LinSrgb, Mat3, Okhsl, Okhsv, Oklch, Oklrab, Xyz,
 };
 
 pub use self::properties::Iter;
@@ -178,7 +178,7 @@ pub(crate) fn m2_inv<T: Real>() -> Mat3<T> {
     palette_internal,
     white_point = "D65",
     component = "T",
-    skip_derives(Oklab, Oklch, Okhsv, Okhsl, Xyz, Rgb)
+    skip_derives(Oklab, Oklch, Oklrab, Okhsv, Okhsl, Xyz, Rgb)
 )]
 #[repr(C)]
 pub struct Oklab<T = f32> {
@@ -358,6 +358,15 @@ where
             a: a * chroma.clone(),
             b: b * chroma,
         }
+    }
+}
+
+impl<T> FromColorUnclamped<Oklrab<T>> for Oklab<T>
+where
+    T: Real + Powi + Arithmetics + One + Clone,
+{
+    fn from_color_unclamped(color: Oklrab<T>) -> Self {
+        Oklab::new(toe_inv(color.l), color.a, color.b)
     }
 }
 
