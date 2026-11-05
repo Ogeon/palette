@@ -1,5 +1,9 @@
 //! Types for the HWB color space.
 
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
+
 use core::{any::TypeId, marker::PhantomData};
 
 #[cfg(feature = "random")]
@@ -44,19 +48,12 @@ pub type Hwba<S = Srgb, T = f32> = Alpha<Hwb<S, T>, T>;
 ///
 /// It is very intuitive for humans to use and many color-pickers are based on
 /// the HWB color system
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    rgb_standard = "S",
-    component = "T",
-    skip_derives(Hsv, Hwb)
-)]
 #[repr(C)]
 pub struct Hwb<S = Srgb, T = f32> {
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc. Same as the hue for HSL and HSV.
-    #[palette(unsafe_same_layout_as = "T")]
     pub hue: RgbHue<T>,
 
     /// The whiteness of the color. It specifies the amount white to mix into
@@ -75,7 +72,6 @@ pub struct Hwb<S = Srgb, T = f32> {
     /// The white point and RGB primaries this color is adapted to. The default
     /// is the sRGB standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
 }
 

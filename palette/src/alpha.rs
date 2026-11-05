@@ -26,6 +26,14 @@ mod alpha;
 /// has a field for transparency (an alpha channel), it has to be marked with
 /// `#[palette(alpha)]` to be taken into account.
 ///
+/// ## Item Attributes
+///
+/// * `#[palette(crate = "renamed_palette"`)]`: Uses the provided name as the
+///   crate name for `palette` in paths. This is only relevant if `palette`
+///   has been renamed in `Cargo.toml` or should be accessed via an alias.
+///
+/// ## Examples
+///
 /// Derived without an internal alpha channel:
 ///
 /// ```

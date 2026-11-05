@@ -46,13 +46,8 @@ pub type Cam16UcsJmha<T> = Alpha<Cam16UcsJmh<T>, T>;
 /// let ucs_from_array = Cam16UcsJmh::from([50.0f32, 80.0, 120.0]);
 /// let ucs_from_tuple = Cam16UcsJmh::from((50.0f32, 80.0, 120.0));
 /// ```
-#[derive(Clone, Copy, Debug, Default, WithAlpha, ArrayCast, FromColorUnclamped)]
+#[derive(Clone, Copy, Debug, Default)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    component = "T",
-    skip_derives(Cam16Jmh, Cam16UcsJmh, Cam16UcsJab)
-)]
 #[repr(C)]
 pub struct Cam16UcsJmh<T> {
     /// The lightness (J') of the color.
@@ -70,7 +65,6 @@ pub struct Cam16UcsJmh<T> {
     ///
     /// It's the same as [`Cam16::hue`][crate::cam16::Cam16::hue], despite the
     /// h' notation.
-    #[palette(unsafe_same_layout_as = "T")]
     pub hue: Cam16Hue<T>,
 }
 

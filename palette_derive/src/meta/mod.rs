@@ -1,11 +1,12 @@
-use proc_macro2::TokenStream;
+use palette_codegen::util::IdentOrIndex;
+
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{
     parse::{Parser, Result},
     token::Comma,
 };
-use syn::{Attribute, Fields, Ident, Index, Meta, Type};
+use syn::{Attribute, Fields, Meta, Type};
 
 pub use self::field_attributes::*;
 pub use self::type_item_attributes::*;
@@ -138,44 +139,6 @@ pub fn assert_path_meta(meta: &Meta) -> Result<()> {
     }
 
     Ok(())
-}
-
-#[derive(Clone)]
-pub enum IdentOrIndex {
-    Index(Index),
-    Ident(Ident),
-}
-
-impl PartialEq for IdentOrIndex {
-    fn eq(&self, other: &IdentOrIndex) -> bool {
-        match (self, other) {
-            (IdentOrIndex::Index(this), IdentOrIndex::Index(other)) => this.index == other.index,
-            (IdentOrIndex::Ident(this), IdentOrIndex::Ident(other)) => this == other,
-            _ => false,
-        }
-    }
-}
-
-impl Eq for IdentOrIndex {}
-
-impl ::std::hash::Hash for IdentOrIndex {
-    fn hash<H: ::std::hash::Hasher>(&self, hasher: &mut H) {
-        ::std::mem::discriminant(self).hash(hasher);
-
-        match *self {
-            IdentOrIndex::Index(ref index) => index.index.hash(hasher),
-            IdentOrIndex::Ident(ref ident) => ident.hash(hasher),
-        }
-    }
-}
-
-impl ::quote::ToTokens for IdentOrIndex {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        match *self {
-            IdentOrIndex::Index(ref index) => index.to_tokens(tokens),
-            IdentOrIndex::Ident(ref ident) => ident.to_tokens(tokens),
-        }
-    }
 }
 
 pub trait AttributeArgumentParser: Default {

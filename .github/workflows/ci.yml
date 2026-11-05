@@ -44,8 +44,6 @@ jobs:
         with:
           components: clippy
       - uses: taiki-e/install-action@cargo-hack
-      - name: find-crate check
-        run: cargo clippy -v -p palette --no-default-features --features "std find-crate"
       - name: Default check
         run: cargo clippy -v -p palette
       - name: Check all features
@@ -53,7 +51,7 @@ jobs:
       - name: Test all features
         run: cargo test -v -p palette --all-features
       - name: Test each palette feature
-        run: cargo hack test -p palette --tests --feature-powerset --skip default,find-crate,named_from_str --features palette_math/libm --depth 2
+        run: cargo hack test -p palette --tests --feature-powerset --skip default,named_from_str --features palette_math/libm --depth 2
       - name: Test each palette_math feature
         run: cargo hack test -p palette_math --tests --feature-powerset --skip default --depth 2
       - name: Test each palette_derive feature
@@ -89,9 +87,9 @@ jobs:
       - name: Check all features
         run: cargo clippy -v -p palette --all-features
       - name: Check each feature with libm
-        run: cargo hack clippy --each-feature --ignore-private --features libm --skip default,find-crate --ignore-unknown-features
+        run: cargo hack clippy --each-feature --ignore-private --features libm --skip default --ignore-unknown-features
       - name: Check each feature with std
-        run: cargo hack clippy --each-feature --ignore-private --features std --skip default,find-crate --optional-deps libm --ignore-unknown-features
+        run: cargo hack clippy --each-feature --ignore-private --features std --skip default --optional-deps libm --ignore-unknown-features
   no_std:
     name: "Test #[no_std]"
     runs-on: ubuntu-latest

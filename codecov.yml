@@ -10,6 +10,9 @@ component_management:
     - component_id: palette
       paths:
         - palette/**
+    - component_id: palette_codegen
+      paths:
+        - palette_codegen/**
     - component_id: palette_derive
       paths:
         - palette_derive/**

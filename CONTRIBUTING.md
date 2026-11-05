@@ -228,29 +228,20 @@ Types from `palette` implement traits from some third party crates. Some of them
 
 ### Color Conversion
 
-The central trait for color conversion is `FromColorUnclamped`. This should be derived for the color type to implement all combinations of conversions. The number of conversion combinations grows exponentially, so you don't want to do it by hand. Some manual conversions are also necessary.
+The central trait for color conversion is `FromColorUnclamped`. This should be genrated, using the `codegen` crate, for the color type to implement all combinations of conversions. The number of conversion combinations grows fast, so you don't want to do it by hand. Some manual conversions are still necessary.
 
-#### In The `palette_derive` Crate
+#### In The `palette_codegen` Crate
 
-Add the type's name to its color group (typically `BASE_COLORS`) in `color_types.rs`. This includes it in the list of possible derived conversions. The `preferred_source` tells the library how to find a path to the color type. Each color space has a "parent" space that all connects to `Xyz`. For example, `Hwb` connects to `Hsv`, which connects to `Rgb`, which connects to `Xyz`. The derived conversion code will backtrack as far towards `Xyz` as it needs, until it finds a way to convert to your type.
+Add metadata for the type, and add the type to its color group (typically `XYZ_COLORS`) in `color_types.rs`. This includes it in the list of possible generated and derived conversions. The `preferred_source` tells the library how to find a path to the color type. Each color space has a "parent" space that all connects to `Xyz`. For example, `Hwb` connects to `Hsv`, which connects to `Rgb`, which connects to `Xyz`. The derived conversion code will backtrack as far towards `Xyz` as it needs, until it finds a way to convert to your type.
 
 Other special casing may be needed in other parts of the code, depending on the type. This part can be confusing, so feel free to ask!
 
 #### In The `palette` Crate
 
-Derive `FromColorUnclamped` and add a `#[palette(palette_internal)]` (and more parameters) attribute should be added. The `palette_internal` parameter makes the derive macro find the types and modules in `crate::`.
-
-In addition to that, add the following in the attribute:
-
-* `component = "T"` to point out the component type.
-* `white_point = "Wp"` and other meta info to point out the white point type, if necessary. See the list in the documentation or follow the error hints.
-* `color_group = "group"` if it's not part of the bas group, such as `"cam16"` if it's a CIE CAM16 derivative.
-* `skip_derives(Xyz, Hsv, Hsl)` with all color types you want to convert from with manual implementations.
-
 Add manual conversions for at least one color type and list it in `skip_derives`. `Xyz` is assumed if `skip_derives` is omitted. These are the minimum requirements:
 
-* Implement `FromColorUnclamped<Self> for MyType<Wp, T>`, usually as a unit conversion. This is not blanket implemented, to allow the case when it's not a unit conversion.
-* Implement `FromColorUnclamped<MyParentType> for MyType<Wp, T>` for converting from the "parent type" this color type is connected to in `PREFERRED_CONVERSION_SOURCE`. The parent type need a `FromColorUnclamped<MyType<Wp, T>>` implementation, too. Also, make sure to mention it in `skip_derives`.
+* Implement `FromColorUnclamped<MyType<Wp, T>> for MyType<Wp, T>`, usually as a unit conversion. This is not blanket implemented, to allow the case when it's not a unit conversion.
+* Implement `FromColorUnclamped<MyParentType> for MyType<Wp, T>` for converting from the "parent type" this color type is connected to in `PREFERRED_CONVERSION_SOURCE`. The parent type need a `FromColorUnclamped<MyType<Wp, T>>` implementation, too. Also, make sure to mention it in `skip_derives`, in `palette_codegen`.
 
 #### Enabling `FromColor` And `TryFromColor`
 

@@ -1,26 +1,25 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use proc_macro2::Span;
-use syn::{parse_quote, Generics, Result, Type};
+use syn::{parse_quote, Generics, Ident, Result, Type};
 
 use crate::{
-    color_types::{ColorInfo, MetaTypeSource},
-    meta::TypeItemAttributes,
-    util,
+    color_types::{ColorGroup, ColorInfo, ColorMeta, MetaTypeSource},
+    util::{self, Ref},
 };
 
-pub fn white_point_type(
+pub(crate) fn white_point_type(
     white_point: Option<&Type>,
     rgb_standard: Option<&Type>,
     luma_standard: Option<&Type>,
-    internal: bool,
+    palette_name: &Ident,
 ) -> Option<(Type, WhitePointSource)> {
     white_point
         .map(|white_point| (white_point.clone(), WhitePointSource::WhitePoint))
         .or_else(|| {
             rgb_standard.map(|rgb_standard| {
-                let rgb_standard_path = util::path(["rgb", "RgbStandard"], internal);
-                let rgb_space_path = util::path(["rgb", "RgbSpace"], internal);
+                let rgb_standard_path = util::path(["rgb", "RgbStandard"], palette_name);
+                let rgb_space_path = util::path(["rgb", "RgbSpace"], palette_name);
                 (
                     parse_quote!(<<#rgb_standard as #rgb_standard_path>::Space as #rgb_space_path>::WhitePoint),
                     WhitePointSource::RgbStandard,
@@ -29,7 +28,7 @@ pub fn white_point_type(
         })
         .or_else(|| {
             luma_standard.map(|luma_standard| {
-                let luma_standard_path = util::path(["luma", "LumaStandard"], internal);
+                let luma_standard_path = util::path(["luma", "LumaStandard"], palette_name);
                 (
                     parse_quote!(<#luma_standard as #luma_standard_path>::WhitePoint),
                     WhitePointSource::LumaStandard,
@@ -38,16 +37,13 @@ pub fn white_point_type(
         })
 }
 
-pub fn component_type(component: Option<Type>) -> Type {
-    component.unwrap_or_else(|| parse_quote!(f32))
-}
-
 pub(crate) fn get_convert_color_type(
     color: &ColorInfo,
     white_point: &Type,
     component: &Type,
-    meta: &TypeItemAttributes,
+    color_meta: &ColorMeta,
     generics: &mut Generics,
+    palette_name: &Ident,
 ) -> syn::Result<(Type, UsedInput)> {
     let mut used_input = UsedInput::default();
     let color_type = color.get_type(
@@ -56,7 +52,8 @@ pub(crate) fn get_convert_color_type(
         white_point,
         &mut used_input,
         InputUser::Target,
-        meta,
+        color_meta,
+        palette_name,
     )?;
 
     Ok((color_type, used_input))
@@ -64,17 +61,18 @@ pub(crate) fn get_convert_color_type(
 
 pub(crate) fn find_nearest_color<'a>(
     color: &'a ColorInfo,
-    meta: &TypeItemAttributes,
+    skip_derives: &HashSet<String>,
+    color_groups: &HashSet<Ref<'static, ColorGroup>>,
 ) -> Result<&'a ColorInfo> {
     let mut stack = vec![(color, 0)];
     let mut found = None;
     let mut visited = HashMap::new();
 
     // Make sure there is at least one valid color in the skip list
-    assert!(!meta.skip_derives.is_empty());
+    assert!(!skip_derives.is_empty());
 
     while let Some((color, distance)) = stack.pop() {
-        if meta.skip_derives.contains(color.name) {
+        if skip_derives.contains(color.name) {
             if let Some((_, found_distance)) = found {
                 if distance < found_distance {
                     found = Some((color, distance));
@@ -95,16 +93,16 @@ pub(crate) fn find_nearest_color<'a>(
         visited.insert(color.name, distance);
 
         // Start by pushing the plan B routes...
-        for group in &meta.color_groups {
+        for group in color_groups {
             for candidate in group.colors {
                 if color.name == candidate.preferred_source {
-                    stack.push((&candidate.info, distance + 1));
+                    stack.push((candidate.info, distance + 1));
                 }
             }
         }
 
         // ...then push the preferred routes. They will be popped first.
-        for group in &meta.color_groups {
+        for group in color_groups {
             for candidate in group.colors {
                 if color.name == candidate.info.name {
                     let preferred = group
@@ -130,7 +128,7 @@ pub(crate) fn find_nearest_color<'a>(
 }
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
-pub enum WhitePointSource {
+pub(crate) enum WhitePointSource {
     WhitePoint,
     RgbStandard,
     LumaStandard,
@@ -139,12 +137,12 @@ pub enum WhitePointSource {
 }
 
 #[derive(Debug, Default)]
-pub struct UsedInput {
+pub(crate) struct UsedInput {
     pub white_point: InputUsage,
 }
 
 #[derive(Debug, Default)]
-pub struct InputUsage {
+pub(crate) struct InputUsage {
     used_by_target: bool,
     used_by_nearest: bool,
 }
@@ -167,7 +165,7 @@ impl InputUsage {
 }
 
 #[derive(Clone, Copy)]
-pub enum InputUser {
+pub(crate) enum InputUser {
     Target,
     Nearest,
 }

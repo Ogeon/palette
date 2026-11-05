@@ -59,9 +59,8 @@ pub type Lmsa<M, T> = Alpha<Lms<M, T>, T>;
 /// let lms_from_array = VonKriesLms::<D65, f32>::from([0.1, 0.2, 0.3]);
 /// let lms_from_tuple = VonKriesLms::<D65, f32>::from((0.1, 0.2, 0.3));
 /// ```
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(palette_internal, component = "T", skip_derives(Lms, Xyz))]
 #[repr(C)]
 pub struct Lms<M, T> {
     /// Stimulus from long wavelengths, or red, or ρ. The typical range is
@@ -79,7 +78,6 @@ pub struct Lms<M, T> {
     /// Type level meta information, such as reference white, or which matrix
     /// was used when converting from XYZ.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub meta: PhantomData<M>,
 }
 

@@ -1,0 +1,16 @@
+[package]
+name = "derive_ui_tests"
+version = "0.0.0"
+authors = ["Erik Hedvall <hello@erikhedvall.nu>"]
+exclude = []
+description = "Integration test crate for palette."
+repository = "https://github.com/Ogeon/palette"
+license = "MIT OR Apache-2.0"
+edition = "2021"
+publish = false
+
+[dev-dependencies]
+palette = { path = "../palette" }
+trybuild = "1.0"
+macrotest = "1.2.1"
+glob = "0.3.4"

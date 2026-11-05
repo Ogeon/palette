@@ -33,16 +33,23 @@ use crate::ArrayExt;
 /// layout, or are zero-sized, they can be marked with attributes to show that
 /// their types are safe to use.
 ///
+/// ## Item Attributes
+///
+/// * `#[palette(crate = "renamed_palette"`)]`: Uses the provided name as the
+///   crate name for `palette` in paths. This is only relevant if `palette`
+///   has been renamed in `Cargo.toml` or should be accessed via an alias.
+///
 /// ## Field Attributes
 ///
-/// * `#[palette_unsafe_same_layout_as = "SomeType"]`: Mark the field as having
-///   the same memory layout as `SomeType`.
+/// * `#[palette(unsafe_same_layout_as = "SomeType")]`: Mark the field as
+///   having the same memory layout as `SomeType`.
 ///
 ///   **Safety:** corrupt data and undefined behavior may occur if this is not
 ///   true!
 ///
-/// * `#[palette_unsafe_zero_sized]`: Mark the field as being zero-sized, and
-///   thus not taking up any memory space. This means that it can be ignored.
+/// * `#[palette(unsafe_zero_sized)]`: Mark the field as being zero-sized, and
+///   thus not taking up any memory space. This means that it can be
+///   ignored.
 ///
 ///   **Safety:** corrupt data and undefined behavior may occur if this is not
 ///   true!

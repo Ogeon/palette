@@ -23,6 +23,9 @@ pub use self::properties::Iter;
 pub use self::random::UniformOklab;
 
 mod alpha;
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 mod properties;
 #[cfg(feature = "random")]
 mod random;
@@ -172,14 +175,8 @@ pub(crate) fn m2_inv<T: Real>() -> Mat3<T> {
 /// To ensure a color is within the *sRGB* gamut, first convert it to `Okhsl`,
 /// lighten/darken it there and convert it back to `Oklab`.
 
-#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "D65",
-    component = "T",
-    skip_derives(Oklab, Oklch, Okhsv, Okhsl, Xyz, Rgb)
-)]
 #[repr(C)]
 pub struct Oklab<T = f32> {
     /// `l` is the lightness of the color. `0` gives absolute black and `1` gives the
@@ -254,6 +251,7 @@ where
 }
 
 impl<T> FromColorUnclamped<Oklab<T>> for Oklab<T> {
+    #[inline]
     fn from_color_unclamped(color: Self) -> Self {
         color
     }
@@ -263,6 +261,7 @@ impl<T> FromColorUnclamped<Xyz<D65, T>> for Oklab<T>
 where
     T: Real + Cbrt + Arithmetics,
 {
+    #[inline]
     fn from_color_unclamped(color: Xyz<D65, T>) -> Self {
         let m1 = m1();
         let m2 = m2();

@@ -9,7 +9,6 @@ use crate::{
     convert::FromColorUnclamped,
     num::{Arithmetics, One},
     stimulus::{FromStimulus, Stimulus},
-    white_point::D65,
     HasBoolMask, Okhsv, OklabHue,
 };
 
@@ -19,6 +18,9 @@ pub use self::properties::Iter;
 pub use self::random::UniformOkhwb;
 
 mod alpha;
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 mod properties;
 #[cfg(feature = "random")]
 mod random;
@@ -28,14 +30,8 @@ mod visual_eq;
 
 /// A Hue/Whiteness/Blackness representation of [`Oklab`][crate::Oklab] in the
 /// `sRGB` color space, similar to [`Hwb`][crate::Okhwb].
-#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "D65",
-    component = "T",
-    skip_derives(Okhwb, Okhsv)
-)]
 #[repr(C)]
 pub struct Okhwb<T = f32> {
     /// The hue of the color, in degrees of a circle.
@@ -47,7 +43,6 @@ pub struct Okhwb<T = f32> {
     /// * 240° to a kind of blue (RBG #00aefe).
     ///
     /// For s == 0 or v == 0, the hue is irrelevant.
-    #[palette(unsafe_same_layout_as = "T")]
     pub hue: OklabHue<T>,
 
     /// The amount of white, mixed in the pure hue, ranging from `0.0` to `1.0`.
@@ -129,11 +124,19 @@ where
 impl_reference_component_methods_hue!(Okhwb, [whiteness, blackness]);
 impl_struct_of_arrays_methods_hue!(Okhwb, [whiteness, blackness]);
 
+impl<T> FromColorUnclamped<Okhwb<T>> for Okhwb<T> {
+    #[inline]
+    fn from_color_unclamped(val: Okhwb<T>) -> Self {
+        val
+    }
+}
+
 impl<T> FromColorUnclamped<Okhsv<T>> for Okhwb<T>
 where
     T: One + Arithmetics,
 {
     /// Converts `lab` to `Okhwb` in the bounds of sRGB.
+    #[inline]
     fn from_color_unclamped(hsv: Okhsv<T>) -> Self {
         // See <https://bottosson.github.io/posts/colorpicker/#okhwb>.
         Self {

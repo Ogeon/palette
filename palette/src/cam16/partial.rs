@@ -91,12 +91,7 @@ macro_rules! make_partial_cam16 {
             #[doc = concat!("let partial_from_tuple = ", stringify!($name), "::from((50.0f32, 80.0, 120.0));")]
             /// # }
             /// ```
-            #[derive(Clone, Copy, Debug, Default, ArrayCast, WithAlpha, FromColorUnclamped)]
-            #[palette(
-                palette_internal,
-                component = "T",
-                skip_derives(Cam16, $name)
-            )]
+            #[derive(Clone, Copy, Debug, Default)]
             $(#[$type_meta])*
             #[repr(C)]
             pub struct $name<T> {
@@ -109,7 +104,6 @@ macro_rules! make_partial_cam16 {
                 /// The [hue](https://cie.co.at/eilvterm/17-22-067) (h) of the color.
                 ///
                 /// See [`Cam16::hue`][crate::cam16::Cam16::hue].
-                #[palette(unsafe_same_layout_as = "T")]
                 pub hue: Cam16Hue<T>,
             }
 
@@ -586,7 +580,6 @@ make_partial_cam16! {
     /// let ucs = Cam16UcsJmh::new(50.0f32, 80.0, 120.0);
     /// let partial_from_ucs = Cam16Jmh::from_color(ucs);
     /// ```
-    #[palette(skip_derives(Cam16UcsJmh))]
     cam16_jmh::Cam16Jmh {
         /// The [lightness](https://cie.co.at/eilvterm/17-22-063) (J) of the
         /// color.

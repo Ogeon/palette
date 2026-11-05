@@ -1,5 +1,9 @@
 //! Types for the HSLuv color space.
 
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
+
 use core::marker::PhantomData;
 
 use crate::{
@@ -26,19 +30,12 @@ pub type Hsluva<Wp = D65, T = f32> = Alpha<Hsluv<Wp, T>, T>;
 /// 100.0]. This makes HSLuv much more convenient for generating
 /// colors than Lchuv, as the set of valid saturation values is
 /// independent of lightness and hue.
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "Wp",
-    component = "T",
-    skip_derives(Lchuv, Hsluv)
-)]
 #[repr(C)]
 pub struct Hsluv<Wp = D65, T = f32> {
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
-    #[palette(unsafe_same_layout_as = "T")]
     pub hue: LuvHue<T>,
 
     /// The colorfulness of the color, as a percentage of the maximum
@@ -53,7 +50,6 @@ pub struct Hsluv<Wp = D65, T = f32> {
     /// The white point and RGB primaries this color is adapted to. The default
     /// is the sRGB standard.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
 }
 

@@ -1,0 +1,11 @@
+error: expected fields to have type `f32`
+ --> tests/ui/fail/array_cast_mixed.rs:7:5
+  |
+7 |     b: u32,
+  |     ^
+
+error: expected fields to have type `f32`
+  --> tests/ui/fail/array_cast_mixed.rs:14:5
+   |
+14 |     b: T,
+   |     ^

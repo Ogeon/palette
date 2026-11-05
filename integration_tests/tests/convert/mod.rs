@@ -1,6 +1,7 @@
 mod data_cie_15_2004;
 mod data_ciede_2000;
 mod data_color_mine;
+mod derived;
 mod lab_lch;
 
 #[test]
