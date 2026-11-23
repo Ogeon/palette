@@ -42,7 +42,7 @@ pub struct Okhwb<T = f32> {
     ///
     /// For fully saturated, bright colors
     /// * 0° corresponds to a kind of magenta-pink (RBG #ff0188),
-    /// * 90° to a kind of yellow (RBG RGB #ffcb00)
+    /// * 90° to a kind of yellow (RBG #ffcb00)
     /// * 180° to a kind of cyan (RBG #00ffe1) and
     /// * 240° to a kind of blue (RBG #00aefe).
     ///
