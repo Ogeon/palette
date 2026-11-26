@@ -30,14 +30,8 @@ pub type Lumaa<S = Srgb, T = f32> = Alpha<Luma<S, T>, T>;
 /// perceived to be. It's basically the `Y` component of [CIE
 /// XYZ](crate::Xyz). The lack of any form of hue representation limits
 /// the set of operations that can be performed on it.
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    luma_standard = "S",
-    component = "T",
-    skip_derives(Xyz, Yxy, Luma)
-)]
 #[repr(C)]
 #[doc(alias = "gray")]
 #[doc(alias = "grey")]
@@ -47,7 +41,6 @@ pub struct Luma<S = Srgb, T = f32> {
 
     /// The kind of RGB standard. sRGB is the default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
 }
 

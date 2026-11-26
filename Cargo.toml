@@ -3,9 +3,11 @@ members = [
     "palette",
     "palette_derive",
     "palette_math",
+    "palette_codegen",
 
     # Test crates
     "integration_tests",
+    "derive_ui_tests",
     "no_std_test",
     "benchmarks",
 

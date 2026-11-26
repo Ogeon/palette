@@ -1,5 +1,8 @@
 //! Types for the CIE 1931 XYZ color space.
 
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 pub mod meta;
 
 use core::{
@@ -43,14 +46,8 @@ pub type Xyza<Wp = D65, T = f32> = Alpha<Xyz<Wp, T>, T>;
 ///
 /// Conversions and operations on this color space depend on the defined white
 /// point
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "Wp",
-    component = "T",
-    skip_derives(Xyz, Yxy, Luv, Rgb, Lab, Oklab, Luma, Lms)
-)]
 #[repr(C)]
 pub struct Xyz<Wp = D65, T = f32> {
     /// X is the scale of what can be seen as a response curve for the cone
@@ -69,7 +66,6 @@ pub struct Xyz<Wp = D65, T = f32> {
     /// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
 }
 

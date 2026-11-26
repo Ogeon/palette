@@ -15,13 +15,15 @@ use crate::{
     },
     ok_utils::{self, LC, ST},
     stimulus::{FromStimulus, Stimulus},
-    white_point::D65,
     GetHue, HasBoolMask, LinSrgb, Okhwb, Oklab, OklabHue,
 };
 
 pub use self::properties::Iter;
 
 mod alpha;
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 mod properties;
 #[cfg(feature = "random")]
 mod random;
@@ -35,14 +37,8 @@ mod visual_eq;
 /// * changing lightness/chroma/saturation while keeping perceived Hue constant
 ///   (like HSV promises but delivers only partially)
 /// * finding the strongest color (maximum chroma) at s == 1 (like HSV)
-#[derive(Debug, Copy, Clone, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "D65",
-    component = "T",
-    skip_derives(Oklab, Okhwb)
-)]
 #[repr(C)]
 pub struct Okhsv<T = f32> {
     /// The hue of the color, in degrees of a circle.
@@ -54,7 +50,6 @@ pub struct Okhsv<T = f32> {
     /// * 240° to a kind of blue (RBG #00aefe).
     ///
     /// For s == 0 or v == 0, the hue is irrelevant.
-    #[palette(unsafe_same_layout_as = "T")]
     pub hue: OklabHue<T>,
 
     /// The saturation (freedom of whitishness) of the color.
@@ -166,6 +161,13 @@ impl<T> Okhsv<T> {
     /// Convert from a `(h, s, v)` tuple.
     pub fn from_components<H: Into<OklabHue<T>>>((hue, saturation, value): (H, T, T)) -> Self {
         Self::new(hue, saturation, value)
+    }
+}
+
+impl<T> FromColorUnclamped<Okhsv<T>> for Okhsv<T> {
+    #[inline]
+    fn from_color_unclamped(val: Okhsv<T>) -> Self {
+        val
     }
 }
 

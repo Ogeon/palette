@@ -86,6 +86,9 @@ pub use ucs_jab::UniformCam16UcsJab;
 #[cfg(feature = "random")]
 pub use ucs_jmh::UniformCam16UcsJmh;
 
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
 mod full;
 pub(crate) mod math;
 mod parameters;

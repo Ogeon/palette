@@ -47,13 +47,8 @@ pub type Cam16UcsJaba<T> = Alpha<Cam16UcsJab<T>, T>;
 /// let ucs_from_array = Cam16UcsJab::from([50.0f32, 80.0, -30.0]);
 /// let ucs_from_tuple = Cam16UcsJab::from((50.0f32, 80.0, -30.0));
 /// ```
-#[derive(Clone, Copy, Debug, Default, WithAlpha, ArrayCast, FromColorUnclamped)]
+#[derive(Clone, Copy, Debug, Default)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    component = "T",
-    skip_derives(Cam16UcsJmh, Cam16UcsJab)
-)]
 #[repr(C)]
 pub struct Cam16UcsJab<T> {
     /// The lightness (J') of the color.

@@ -179,14 +179,8 @@ pub type Rgba<S = Srgb, T = f32> = Alpha<Rgb<S, T>, T>;
 ///     std::mem::swap(&mut pixel.red, &mut pixel.blue);
 /// }
 /// ```
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    rgb_standard = "S",
-    component = "T",
-    skip_derives(Xyz, Hsv, Hsl, Luma, Rgb, Oklab)
-)]
 #[repr(C)]
 pub struct Rgb<S = Srgb, T = f32> {
     /// The amount of red light, where 0.0 is no red light and 1.0 (or 255u8) is
@@ -203,7 +197,6 @@ pub struct Rgb<S = Srgb, T = f32> {
 
     /// The kind of RGB standard. sRGB is the default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub standard: PhantomData<S>,
 }
 

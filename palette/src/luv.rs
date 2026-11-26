@@ -1,5 +1,9 @@
 //! Types for the CIE L\*u\*v\* (CIELUV) color space.
 
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
+
 use core::{
     marker::PhantomData,
     ops::{Add, Mul, Neg},
@@ -28,14 +32,8 @@ pub type Luva<Wp = D65, T = f32> = Alpha<Luv<Wp, T>, T>;
 /// CIELUV-space.
 ///
 /// As a result, CIELUV is used more frequently for additive settings.
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "Wp",
-    component = "T",
-    skip_derives(Xyz, Luv, Lchuv)
-)]
 #[repr(C)]
 pub struct Luv<Wp = D65, T = f32> {
     /// L\* is the lightness of the color. 0.0 gives absolute black and 100
@@ -55,7 +53,6 @@ pub struct Luv<Wp = D65, T = f32> {
     /// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
 }
 

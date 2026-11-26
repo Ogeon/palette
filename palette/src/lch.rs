@@ -1,5 +1,9 @@
 //! Types for the CIE L\*C\*h° color space.
 
+mod codegen_array_cast;
+mod codegen_from_color_unclamped;
+mod codegen_with_alpha;
+
 use core::{
     marker::PhantomData,
     ops::{BitAnd, BitOr},
@@ -26,14 +30,8 @@ pub type Lcha<Wp = D65, T = f32> = Alpha<Lch<Wp, T>, T>;
 /// it's a cylindrical color space, like [HSL](crate::Hsl) and
 /// [HSV](crate::Hsv). This gives it the same ability to directly change
 /// the hue and colorfulness of a color, while preserving other visual aspects.
-#[derive(Debug, ArrayCast, FromColorUnclamped, WithAlpha)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serializing", derive(Serialize, Deserialize))]
-#[palette(
-    palette_internal,
-    white_point = "Wp",
-    component = "T",
-    skip_derives(Lab, Lch)
-)]
 #[repr(C)]
 pub struct Lch<Wp = D65, T = f32> {
     /// L\* is the lightness of the color. 0.0 gives absolute black and 100.0
@@ -48,13 +46,11 @@ pub struct Lch<Wp = D65, T = f32> {
 
     /// The hue of the color, in degrees. Decides if it's red, blue, purple,
     /// etc.
-    #[palette(unsafe_same_layout_as = "T")]
     pub hue: LabHue<T>,
 
     /// The white point associated with the color's illuminant and observer.
     /// D65 for 2 degree observer is used by default.
     #[cfg_attr(feature = "serializing", serde(skip))]
-    #[palette(unsafe_zero_sized)]
     pub white_point: PhantomData<Wp>,
 }
 
